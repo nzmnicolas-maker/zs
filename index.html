@@ -214,7 +214,7 @@
         }
         .input-group { margin-bottom: 12px; }
         .input-group:last-child { margin-bottom: 0; }
-        .input-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .input-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
         .input-label i { color: var(--accent); font-size: 10px; }
         .input-row {
             display: flex; align-items: center;
@@ -348,7 +348,6 @@
 
     <main>
 
-        <!-- Hero: Saída estimada -->
         <div class="departure-card">
             <div class="dept-label">⏱ Saída estimada hoje</div>
             <div class="dept-time" id="dept-time">17:50</div>
@@ -365,7 +364,6 @@
             </div>
         </div>
 
-        <!-- Progresso -->
         <div class="progress-card">
             <div class="progress-header">
                 <div class="progress-label"><i class="fa-solid fa-chart-simple"></i> Expediente</div>
@@ -380,12 +378,11 @@
             </div>
         </div>
 
-        <!-- Configuração -->
         <div class="config-card">
             <div class="section-title"><i class="fa-solid fa-sliders"></i> Configuração</div>
 
             <div class="input-group">
-                <label class="input-label" for="in-entry"><i class="fa-regular fa-clock"></i> Hora de Entrada</label>
+                <div class="input-label"><i class="fa-regular fa-clock"></i> Hora de Entrada</div>
                 <div class="input-row">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     <input type="time" id="in-entry" value="08:20">
@@ -393,7 +390,7 @@
             </div>
 
             <div class="input-group">
-                <label class="input-label" for="in-lunch-start"><i class="fa-solid fa-door-open"></i> Início do Almoço</label>
+                <div class="input-label"><i class="fa-solid fa-door-open"></i> Início do Almoço</div>
                 <div class="input-row">
                     <i class="fa-solid fa-utensils"></i>
                     <input type="time" id="in-lunch-start" value="12:00">
@@ -401,7 +398,7 @@
             </div>
 
             <div class="input-group">
-                <label class="input-label" for="in-lunch-dur"><i class="fa-solid fa-hourglass-half"></i> Duração do Almoço</label>
+                <div class="input-label"><i class="fa-solid fa-hourglass-half"></i> Duração do Almoço</div>
                 <div class="input-row">
                     <i class="fa-regular fa-clock"></i>
                     <input type="time" id="in-lunch-dur" value="01:00">
@@ -409,7 +406,7 @@
             </div>
 
             <div class="input-group">
-                <label class="input-label" for="in-target"><i class="fa-solid fa-briefcase"></i> Jornada Diária Alvo</label>
+                <div class="input-label"><i class="fa-solid fa-briefcase"></i> Jornada Diária Alvo</div>
                 <div class="input-row">
                     <i class="fa-solid fa-bullseye"></i>
                     <input type="time" id="in-target" value="08:30">
@@ -417,7 +414,6 @@
             </div>
         </div>
 
-        <!-- Timeline -->
         <div class="timeline-card">
             <div class="section-title"><i class="fa-solid fa-timeline"></i> Batidas de hoje</div>
             <div class="timeline">
@@ -472,7 +468,6 @@
             </div>
         </div>
 
-        <!-- Histórico -->
         <div class="history-card">
             <div class="history-header">
                 <div class="section-title" style="margin-bottom:0"><i class="fa-solid fa-folder-open"></i> Histórico</div>
@@ -489,7 +484,6 @@
             </div>
         </div>
 
-        <!-- Dica -->
         <div class="tip-card">
             <i class="fa-solid fa-circle-info tip-icon"></i>
             <div>
