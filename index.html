@@ -214,7 +214,7 @@
         }
         .input-group { margin-bottom: 12px; }
         .input-group:last-child { margin-bottom: 0; }
-        .input-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        .input-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .input-label i { color: var(--accent); font-size: 10px; }
         .input-row {
             display: flex; align-items: center;
@@ -385,7 +385,7 @@
             <div class="section-title"><i class="fa-solid fa-sliders"></i> Configuração</div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-regular fa-clock"></i> Hora de Entrada</div>
+                <label class="input-label" for="in-entry"><i class="fa-regular fa-clock"></i> Hora de Entrada</label>
                 <div class="input-row">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     <input type="time" id="in-entry" value="08:20">
@@ -393,7 +393,7 @@
             </div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-solid fa-door-open"></i> Início do Almoço</div>
+                <label class="input-label" for="in-lunch-start"><i class="fa-solid fa-door-open"></i> Início do Almoço</label>
                 <div class="input-row">
                     <i class="fa-solid fa-utensils"></i>
                     <input type="time" id="in-lunch-start" value="12:00">
@@ -401,7 +401,7 @@
             </div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-solid fa-hourglass-half"></i> Duração do Almoço</div>
+                <label class="input-label" for="in-lunch-dur"><i class="fa-solid fa-hourglass-half"></i> Duração do Almoço</label>
                 <div class="input-row">
                     <i class="fa-regular fa-clock"></i>
                     <input type="time" id="in-lunch-dur" value="01:00">
@@ -409,7 +409,7 @@
             </div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-solid fa-briefcase"></i> Jornada Diária Alvo</div>
+                <label class="input-label" for="in-target"><i class="fa-solid fa-briefcase"></i> Jornada Diária Alvo</label>
                 <div class="input-row">
                     <i class="fa-solid fa-bullseye"></i>
                     <input type="time" id="in-target" value="08:30">
@@ -512,8 +512,9 @@
 
     // ── HELPERS ──
     function toMin(t) {
+        if (!t) return 0;
         const [h, m] = t.split(':').map(Number);
-        return h * 60 + m;
+        return (isNaN(h) || isNaN(m)) ? 0 : h * 60 + m;
     }
     function toTime(min) {
         min = ((min % 1440) + 1440) % 1440;
@@ -522,6 +523,32 @@
     function fmtDur(min) {
         min = Math.max(0, min);
         return String(Math.floor(min / 60)).padStart(2, '0') + 'h' + String(min % 60).padStart(2, '0') + 'min';
+    }
+
+    // ── PERSISTENCE ──
+    function saveCurrentSettings() {
+        const settings = {
+            entry: inEntry.value,
+            lunchStart: inLunchStart.value,
+            lunchDur: inLunchDur.value,
+            target: inTarget.value
+        };
+        localStorage.setItem('pf_settings', JSON.stringify(settings));
+    }
+
+    function loadSettings() {
+        const saved = localStorage.getItem('pf_settings');
+        if (saved) {
+            try {
+                const settings = JSON.parse(saved);
+                if (settings.entry) inEntry.value = settings.entry;
+                if (settings.lunchStart) inLunchStart.value = settings.lunchStart;
+                if (settings.lunchDur) inLunchDur.value = settings.lunchDur;
+                if (settings.target) inTarget.value = settings.target;
+            } catch (e) {
+                console.error("Erro ao carregar configurações salvas", e);
+            }
+        }
     }
 
     // ── RECALCULATE ──
@@ -535,17 +562,18 @@
         const departure = entry + target + lunchDur;
 
         document.getElementById('dept-time').textContent = toTime(departure);
-        document.getElementById('s-entry').textContent = inEntry.value;
-        document.getElementById('s-target').textContent = inTarget.value;
-        document.getElementById('s-lunch').textContent = inLunchDur.value;
+        document.getElementById('s-entry').textContent = inEntry.value || '--:--';
+        document.getElementById('s-target').textContent = inTarget.value || '--:--';
+        document.getElementById('s-lunch').textContent = inLunchDur.value || '--:--';
 
-        document.getElementById('tl-1').textContent = inEntry.value;
-        document.getElementById('tl-2').textContent = inLunchStart.value;
+        document.getElementById('tl-1').textContent = inEntry.value || '--:--';
+        document.getElementById('tl-2').textContent = inLunchStart.value || '--:--';
         document.getElementById('tl-3').textContent = toTime(lunchEnd);
         document.getElementById('tl-4').textContent = toTime(departure);
-        document.getElementById('tl-lunch-desc').textContent = inLunchDur.value;
+        document.getElementById('tl-lunch-desc').textContent = inLunchDur.value || '--:--';
 
         updateProgress();
+        saveCurrentSettings();
     }
 
     // ── PROGRESS ──
@@ -612,6 +640,7 @@
         showToast('Valores redefinidos ↺');
     }
 
+    // ── QUICK CAPTURE ──
     function setNowAsEntry() {
         const now = new Date();
         inEntry.value = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
@@ -643,12 +672,14 @@
         logs = logs.filter(l => l.id !== id);
         localStorage.setItem('pf_logs', JSON.stringify(logs));
         renderHistory();
+        showToast('Registro removido');
     }
 
     function clearHistory() {
-        if (!confirm('Apagar todos os registros?')) return;
+        if (!confirm('Apagar todos os registros do histórico?')) return;
         localStorage.removeItem('pf_logs');
         renderHistory();
+        showToast('Histórico limpo 🗑️');
     }
 
     function renderHistory() {
@@ -656,7 +687,6 @@
         const list = document.getElementById('history-list');
         const empty = document.getElementById('empty-state');
 
-        // Remove old items (keep empty-state)
         Array.from(list.children).forEach(c => { if (c.id !== 'empty-state') c.remove(); });
 
         if (logs.length === 0) {
@@ -671,11 +701,11 @@
             div.innerHTML = `
                 <div class="history-date">${log.date}</div>
                 <div class="history-chips">
-                    <span class="chip in"><i class="fa-solid fa-right-to-bracket"></i>${log.entry}</span>
-                    <span class="chip lunch"><i class="fa-solid fa-utensils"></i>${log.lunch}</span>
-                    <span class="chip out"><i class="fa-solid fa-door-open"></i>${log.departure}</span>
+                    <span class="chip in"><i class="fa-solid fa-right-to-bracket"></i>${log.entry || '--:--'}</span>
+                    <span class="chip lunch"><i class="fa-solid fa-utensils"></i>${log.lunch || '--:--'}</span>
+                    <span class="chip out"><i class="fa-solid fa-door-open"></i>${log.departure || '--:--'}</span>
                 </div>
-                <button class="del-btn" onclick="deleteLog(${log.id})"><i class="fa-regular fa-trash-can"></i></button>
+                <button class="del-btn" onclick="deleteLog(${log.id})" aria-label="Excluir registro"><i class="fa-regular fa-trash-can"></i></button>
             `;
             list.appendChild(div);
         });
@@ -690,10 +720,12 @@
     }
 
     // ── INIT ──
+    loadSettings();
     updateClock();
     recalc();
     renderHistory();
-    setInterval(() => { updateClock(); updateProgress(); }, 30000);
+
+    setInterval(() => { updateClock(); updateProgress(); }, 10000);
 
     [inEntry, inLunchStart, inLunchDur, inTarget].forEach(el => el.addEventListener('input', recalc));
     </script>
