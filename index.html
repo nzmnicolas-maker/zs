@@ -9,7 +9,9 @@
     <meta name="theme-color" content="#1a1a2e">
     <title>PontoFácil</title>
 
+    <!-- Otimização de Fonts: Faltava o gstatic para evitar o "pulo" de fonte no carregamento -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -214,7 +216,13 @@
         }
         .input-group { margin-bottom: 12px; }
         .input-group:last-child { margin-bottom: 0; }
-        .input-label { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; display: flex; align-items: center; gap: 5px; }
+        
+        /* Modificado de div para label para garantir acessibilidade */
+        .input-label { 
+            display: flex; align-items: center; gap: 5px;
+            font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; 
+            cursor: pointer;
+        }
         .input-label i { color: var(--accent); font-size: 10px; }
         .input-row {
             display: flex; align-items: center;
@@ -381,8 +389,9 @@
         <div class="config-card">
             <div class="section-title"><i class="fa-solid fa-sliders"></i> Configuração</div>
 
+            <!-- Adicionado 'for' nas labels e 'id' correspondentes nos inputs para Acessibilidade -->
             <div class="input-group">
-                <div class="input-label"><i class="fa-regular fa-clock"></i> Hora de Entrada</div>
+                <label class="input-label" for="in-entry"><i class="fa-regular fa-clock"></i> Hora de Entrada</label>
                 <div class="input-row">
                     <i class="fa-solid fa-right-to-bracket"></i>
                     <input type="time" id="in-entry" value="08:20">
@@ -390,7 +399,7 @@
             </div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-solid fa-door-open"></i> Início do Almoço</div>
+                <label class="input-label" for="in-lunch-start"><i class="fa-solid fa-door-open"></i> Início do Almoço</label>
                 <div class="input-row">
                     <i class="fa-solid fa-utensils"></i>
                     <input type="time" id="in-lunch-start" value="12:00">
@@ -398,7 +407,7 @@
             </div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-solid fa-hourglass-half"></i> Duração do Almoço</div>
+                <label class="input-label" for="in-lunch-dur"><i class="fa-solid fa-hourglass-half"></i> Duração do Almoço</label>
                 <div class="input-row">
                     <i class="fa-regular fa-clock"></i>
                     <input type="time" id="in-lunch-dur" value="01:00">
@@ -406,7 +415,7 @@
             </div>
 
             <div class="input-group">
-                <div class="input-label"><i class="fa-solid fa-briefcase"></i> Jornada Diária Alvo</div>
+                <label class="input-label" for="in-target"><i class="fa-solid fa-briefcase"></i> Jornada Diária Alvo</label>
                 <div class="input-row">
                     <i class="fa-solid fa-bullseye"></i>
                     <input type="time" id="in-target" value="08:30">
@@ -647,7 +656,13 @@
         const now = new Date();
         const key = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
 
-        let logs = JSON.parse(localStorage.getItem('pf_logs') || '[]');
+        let logs = [];
+        try {
+            logs = JSON.parse(localStorage.getItem('pf_logs') || '[]');
+        } catch(e) {
+            logs = [];
+        }
+
         logs = logs.filter(l => l.date !== key);
         logs.unshift({
             id: Date.now(),
@@ -662,7 +677,12 @@
     }
 
     function deleteLog(id) {
-        let logs = JSON.parse(localStorage.getItem('pf_logs') || '[]');
+        let logs = [];
+        try {
+            logs = JSON.parse(localStorage.getItem('pf_logs') || '[]');
+        } catch(e) {
+            logs = [];
+        }
         logs = logs.filter(l => l.id !== id);
         localStorage.setItem('pf_logs', JSON.stringify(logs));
         renderHistory();
@@ -677,13 +697,18 @@
     }
 
     function renderHistory() {
-        const logs = JSON.parse(localStorage.getItem('pf_logs') || '[]');
+        let logs = [];
+        try {
+            logs = JSON.parse(localStorage.getItem('pf_logs') || '[]');
+        } catch(e) {
+            logs = [];
+        }
         const list = document.getElementById('history-list');
         const empty = document.getElementById('empty-state');
 
         Array.from(list.children).forEach(c => { if (c.id !== 'empty-state') c.remove(); });
 
-        if (logs.length === 0) {
+        if (!Array.isArray(logs) || logs.length === 0) {
             empty.style.display = 'block';
             return;
         }
@@ -710,7 +735,9 @@
         const t = document.getElementById('toast');
         t.textContent = msg;
         t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2400);
+        // Pequena correção: se o usuário clicar rápido, limpa o timeout anterior para não bugar a animação
+        if (t.dataset.timeoutId) clearTimeout(t.dataset.timeoutId);
+        t.dataset.timeoutId = setTimeout(() => t.classList.remove('show'), 2400);
     }
 
     // ── INIT ──
@@ -719,7 +746,9 @@
     recalc();
     renderHistory();
 
-    setInterval(() => { updateClock(); updateProgress(); }, 10000);
+    // Loop otimizado: relógio roda rápido (fluidez), progress roda lento (bateria)
+    setInterval(updateClock, 1000);
+    setInterval(updateProgress, 10000);
 
     [inEntry, inLunchStart, inLunchDur, inTarget].forEach(el => el.addEventListener('input', recalc));
     </script>
