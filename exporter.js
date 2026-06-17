@@ -7,9 +7,7 @@ function exportarParaExcel(registros) {
     return;
   }
 
-  // Cabeçalhos organizados para leitura corporativa
   const cabecalhos = ["Data", "Tipo de Registro", "Horário Oficial", "Chave de Autenticação"];
-  
   const linhas = registros.map(reg => [
     reg.data,
     reg.tipo,
@@ -17,7 +15,6 @@ function exportarParaExcel(registros) {
     reg.assinatura || "Sem assinatura"
   ]);
 
-  // Caractere invisível \uFEFF força o Excel a abrir em UTF-8 nativo (corrige acentos)
   let csvContent = "\uFEFF"; 
   csvContent += cabecalhos.join(";") + "\n";
   
