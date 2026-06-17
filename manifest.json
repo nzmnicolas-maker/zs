@@ -20,5 +20,28 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Registrar Entrada",
+      "short_name": "Entrada",
+      "description": "Bater o ponto de entrada inicial",
+      "url": "./index.html?action=entrada",
+      "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/login-rounded-right.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Iniciar Almoço",
+      "short_name": "Almoço",
+      "description": "Registrar saída para o intervalo",
+      "url": "./index.html?action=almoco_saida",
+      "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/restaurant.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Finalizar Expediente",
+      "short_name": "Saída",
+      "description": "Registrar saída final do dia",
+      "url": "./index.html?action=saida",
+      "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/logout-rounded-left.png", "sizes": "96x96" }]
+    }
   ]
 }
