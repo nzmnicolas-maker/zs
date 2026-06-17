@@ -18,6 +18,7 @@
             --sucesso: #10b981;
             --perigo: #f43f5e;
             --alerta: #f59e0b;
+            --gradiente: linear-gradient(90deg, #4f46e5, #8b5cf6);
         }
 
         [data-theme="light"] {
@@ -28,13 +29,14 @@
             --texto: #0f172a;
             --texto-secundario: #64748b;
             --primaria: #4f46e5;
+            --gradiente: linear-gradient(90deg, #4f46e5, #6366f1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background-color: var(--bg-principal); color: var(--texto); padding: 20px 10px 60px 10px; transition: background 0.3s; }
 
         .app-container { max-width: 1050px; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
-        @media(min-width: 900px) { .app-container { grid-template-columns: 320px 1fr; } }
+        @media(min-width: 900px) { .app-container { grid-template-columns: 340px 1fr; } }
 
         /* Componentes de Layout */
         aside, main, .full-card { background-color: var(--bg-card); border: 1px solid var(--border); padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
@@ -51,20 +53,28 @@
         /* Painel Lateral / Status */
         .side-panel { display: flex; flex-direction: column; gap: 20px; height: max-content; }
         .clock-display { text-align: center; padding: 15px 0; border-bottom: 1px solid var(--border); }
-        .clock-display h2 { font-size: 2.5rem; font-family: monospace; font-weight: 700; }
+        .clock-display h2 { font-size: 2.6rem; font-family: monospace; font-weight: 700; background: linear-gradient(to right, #fff, var(--texto-secundario)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
+        /* NOVO: Barra de Progresso do Expediente */
+        .progress-box { background: var(--bg-input); border: 1px solid var(--border); padding: 16px; border-radius: 12px; display: none; }
+        .progress-box-header { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 8px; font-weight: 600; }
+        .progress-bar-bg { background: var(--bg-principal); width: 100%; height: 10px; border-radius: 10px; overflow: hidden; border: 1px solid var(--border); }
+        .progress-bar-fill { background: var(--gradiente); width: 0%; height: 100%; border-radius: 10px; transition: width 0.5s ease-out; box-shadow: 0 0 10px rgba(139, 92, 246, 0.4); }
+
         /* Grid de Botões */
-        .punch-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px; }
+        .punch-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .btn-punch { background: var(--bg-input); border: 1px solid var(--border); color: var(--texto); padding: 16px 10px; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: all 0.2s; }
         .btn-punch:hover:not(:disabled) { border-color: var(--primaria); transform: translateY(-2px); background: var(--bg-card); }
-        .btn-punch:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-punch:disabled { opacity: 0.25; cursor: not-allowed; }
         .btn-punch i { font-size: 1.4rem; color: var(--primaria); }
 
         /* Mini Dash / Cards */
         .mini-dash { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .mini-card { background: var(--bg-input); border: 1px solid var(--border); padding: 15px; border-radius: 10px; }
-        .mini-card p { font-size: 0.75rem; color: var(--texto-secundario); text-transform: uppercase; margin-bottom: 4px; }
-        .mini-card h3 { font-size: 1.3rem; font-weight: 700; }
+        .mini-card { background: var(--bg-input); border: 1px solid var(--border); padding: 14px; border-radius: 12px; }
+        .mini-card p { font-size: 0.72rem; color: var(--texto-secundario); text-transform: uppercase; margin-bottom: 4px; font-weight: 700; letter-spacing: 0.5px; }
+        .mini-card h3 { font-size: 1.3rem; font-weight: 700; font-family: monospace; }
+        .val-positivo { color: var(--sucesso); }
+        .val-negativo { color: var(--perigo); }
 
         /* Tabelas e Abas */
         .table-container { width: 100%; overflow-x: auto; margin-top: 15px; }
@@ -77,7 +87,7 @@
         .badge.neg { background: rgba(244, 63, 94, 0.15); color: var(--perigo); }
         .badge.info { background: rgba(79, 70, 229, 0.15); color: var(--primaria); }
 
-        /* Formulários e Modais */
+        /* Formulários */
         .config-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 15px; }
         .input-group { display: flex; flex-direction: column; gap: 6px; }
         .input-group label { font-size: 0.8rem; color: var(--texto-secundario); font-weight: 600; }
@@ -88,12 +98,12 @@
         .btn-action.secundario { background: var(--bg-input); border: 1px solid var(--border); color: var(--texto); }
         .btn-action:hover { opacity: 0.9; }
 
-        #lunchBanner { display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--alerta); color: var(--alerta); padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 0.85rem; align-items: center; justify-content: space-between; }
+        #lunchBanner { display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid var(--alerta); color: var(--alerta); padding: 12px; border-radius: 10px; font-size: 0.85rem; align-items: center; justify-content: space-between; }
 
-        /* Estilos de Impressão de Relatório Oficial (Espelho de Ponto) */
+        /* Impressão Oficial */
         @media print {
             body { background: white !important; color: black !important; padding: 0; }
-            aside, .global-actions, .btn-punch, .config-section, .punch-panel, #lunchBanner, .btn-danger, .btn-icon, .btn-action, th:last-child, td:last-child { display: none !important; }
+            aside, .global-actions, .btn-punch, .config-section, #lunchBanner, .btn-icon, .btn-action, th:last-child, td:last-child { display: none !important; }
             main, .full-card { border: none !important; box-shadow: none !important; width: 100% !important; background: white !important; padding: 0 !important; }
             .app-container { grid-template-columns: 1fr !important; }
             table { border: 1px solid #000; }
@@ -113,7 +123,7 @@
         <header>
             <div class="logo"><i class="fa-solid fa-shield-halved"></i> PontoFácil Ultra</div>
             <div class="global-actions">
-                <div class="streak-badge" title="Ofensiva de foco"><i class="fa-solid fa-fire"></i> <span id="streakCount">0</span> Dias</div>
+                <div class="streak-badge" title="Foco contínuo"><i class="fa-solid fa-fire"></i> <span id="streakCount">0</span> Dias</div>
                 <button class="btn-icon" id="btnTheme" title="Mudar Visual"><i class="fa-solid fa-sun"></i></button>
                 <button class="btn-action secundario" id="btnPrint" onclick="window.print()"><i class="fa-solid fa-print"></i> Relatório</button>
             </div>
@@ -131,8 +141,18 @@
                 <p id="txtData" style="color: var(--texto-secundario); font-size: 0.85rem; margin-top: 4px;"></p>
             </div>
 
+            <div class="progress-box" id="progressoContainer">
+                <div class="progress-box-header">
+                    <span id="progressPctText">0% Concluído</span>
+                    <span id="progressRemainingText" style="color: var(--texto-secundario);">00h 00min restante</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </div>
+
             <div id="lunchBanner">
-                <span><i class="fa-solid fa-utensils"></i> Almoço em andamento: <b id="lunchClock">00:00</b></span>
+                <span><i class="fa-solid fa-utensils"></i> Almoço ativo: <b id="lunchClock">00:00</b></span>
             </div>
 
             <div class="punch-grid">
@@ -144,11 +164,15 @@
 
             <div class="mini-dash">
                 <div class="mini-card">
-                    <p>Hoje</p>
+                    <p>Hoje Feito</p>
                     <h3 id="dashHoje">00:00</h3>
                 </div>
                 <div class="mini-card">
-                    <p>Banco Acumulado</p>
+                    <p>Previsão Saída</p>
+                    <h3 id="dashSaida" style="color: var(--primaria);">--:--</h3>
+                </div>
+                <div class="mini-card" style="grid-column: span 2;">
+                    <p>Banco Acumulado Geral</p>
                     <h3 id="dashBanco">00:00</h3>
                 </div>
             </div>
@@ -179,7 +203,7 @@
                 </div>
             </div>
 
-            <div class="full-card" style="margin-top: 10px;">
+            <div class="full-card">
                 <h3><i class="fa-solid fa-pen-to-square"></i> Ajuste Retroativo / Lançamento Manual</h3>
                 <form id="formManual" class="config-section">
                     <div class="input-group">
@@ -236,7 +260,6 @@
     </div>
 
     <script>
-        // --- ARQUITETURA DO BANCO DE DADOS (INDEXEDDB INDUSTRIAL) ---
         const DB_NAME = 'PontoFacilDB';
         const DB_VERSION = 1;
         let db;
@@ -248,17 +271,12 @@
                 request.onsuccess = (e) => { db = e.target.result; resolve(db); };
                 request.onupgradeneeded = (e) => {
                     let database = e.target.result;
-                    if (!database.objectStoreNames.contains('pontos')) {
-                        database.createObjectStore('pontos', { keyPath: 'data' });
-                    }
-                    if (!database.objectStoreNames.contains('config')) {
-                        database.createObjectStore('config', { keyPath: 'id' });
-                    }
+                    if (!database.objectStoreNames.contains('pontos')) database.createObjectStore('pontos', { keyPath: 'data' });
+                    if (!database.objectStoreNames.contains('config')) database.createObjectStore('config', { keyPath: 'id' });
                 };
             });
         }
 
-        // --- SISTEMA DE ACESSO AO BANCO ---
         async function dbGetPonto(data) {
             return new Promise(r => {
                 let tx = db.transaction('pontos', 'readonly');
@@ -313,16 +331,13 @@
             });
         }
 
-        // --- SISTEMA CORE E VARIÁVEIS ---
         let appConfig = {};
         const hojeStr = new Date().toISOString().split('T')[0];
 
-        // Inicializador Global da Aplicação
         window.addEventListener('DOMContentLoaded', async () => {
             await initDB();
             appConfig = await dbGetConfig();
             
-            // Aplicar configurações iniciais na UI
             document.body.setAttribute('data-theme', appConfig.theme);
             document.getElementById('cfgJornada').value = appConfig.jornada;
             document.getElementById('cfgTolerancia').value = appConfig.tolerancia;
@@ -330,16 +345,13 @@
             
             updateThemeIcon();
             buildMonthFilter();
-            initClock();
+            initClockAndEngine();
             await render();
-            initLunchRealtimeTimer();
 
-            // Bind de Eventos dos botões de batida
             ['entrada', 'almoco_saida', 'almoco_entrada', 'saida'].forEach(tipo => {
                 document.getElementById(`p-${tipo}`).addEventListener('click', () => registrarPonto(tipo));
             });
 
-            // Outros Event Listeners
             document.getElementById('btnTheme').addEventListener('click', toggleTheme);
             document.getElementById('cfgJornada').addEventListener('change', salvarConfiguracoes);
             document.getElementById('cfgTolerancia').addEventListener('change', salvarConfiguracoes);
@@ -349,16 +361,19 @@
             document.getElementById('fileImport').addEventListener('change', importarBackup);
         });
 
-        // Relógio de Alta Precisão
-        function initClock() {
+        // Loop Centralizador: Relógio + Motores Dinâmicos de Tempo Real
+        function initClockAndEngine() {
             setInterval(() => {
                 const agora = new Date();
                 document.getElementById('txtRelogio').innerText = agora.toLocaleTimeString('pt-BR');
                 document.getElementById('txtData').innerText = agora.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+                
+                // Dispara os motores em tempo real
+                calcularProgressoETempoRestante();
+                atualizarCronometroAlmoco();
             }, 1000);
         }
 
-        // --- PROCESSO DE BATIDA DE PONTO COM GEOLOCALIZAÇÃO ---
         async function registrarPonto(tipo) {
             if (navigator.vibrate) navigator.vibrate(60);
 
@@ -367,17 +382,15 @@
             
             logHoje[tipo] = horaAtual;
 
-            // Solicitar coordenadas via GPS se disponível
             if (navigator.geolocation) {
                 try {
-                    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {timeout: 5000}));
+                    const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, {timeout: 4000}));
                     logHoje.geo = `${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
                 } catch (e) {
-                    logHoje.geo = "GPS Negado/Off";
+                    logHoje.geo = "GPS Indisponível";
                 }
             }
 
-            // Regra de Ofensiva (Streak)
             if (appConfig.lastDate !== hojeStr) {
                 const ontemStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
                 if (appConfig.lastDate === ontemStr) appConfig.streak++;
@@ -388,25 +401,23 @@
 
             await dbSavePonto(logHoje);
             await render();
-            initLunchRealtimeTimer();
         }
 
-        // --- CÁLCULO DE JORNADA SUPREMO (COM TURNO NOTURNO E CLT) ---
+        function paraMinutos(hStr) {
+            if(!hStr) return null;
+            const [h, m] = hStr.split(':').map(Number);
+            return (h * 60) + m;
+        }
+
+        // Motor de Cálculo da Jornada e Banco de Horas
         function analisarMinutos(log, metaJornadaStr, usarTolerancia) {
             if (!log.entrada) return { trabalhado: 0, saldo: 0 };
-
-            function paraMinutos(hStr) {
-                if(!hStr) return null;
-                const [h, m] = hStr.split(':').map(Number);
-                return (h * 60) + m;
-            }
 
             let ent = paraMinutos(log.entrada);
             let alms = paraMinutos(log.almoco_saida);
             let alme = paraMinutos(log.almoco_entrada);
             let sai = paraMinutos(log.saida);
 
-            // Se as batidas cruzarem a meia-noite (Turno da Noite), soma-se 1440 minutos (24h)
             if (alms !== null && alms < ent) alms += 1440;
             if (alme !== null && alme < ent) alme += 1440;
             if (sai !== null && sai < ent) sai += 1440;
@@ -414,24 +425,16 @@
             let trabalhado = 0;
 
             if (sai !== null) {
-                if (alms !== null && alme !== null) {
-                    trabalhado = (alms - ent) + (sai - alme);
-                } else {
-                    trabalhado = sai - ent;
-                }
-            } else if (alms !== null && alme === null) {
-                trabalhado = alms - ent;
+                if (alms !== null && alme !== null) trabalhado = (alms - ent) + (sai - alme);
+                else trabalhado = sai - ent;
             } else {
-                // Em andamento
                 const agora = new Date();
                 let agoraMin = agora.getHours() * 60 + agora.getMinutes();
-                if (agoraMin < ent && (agoraMin + 1440 - ent < 1440)) agoraMin += 1440; // Proteção para noite em tempo real
+                if (agoraMin < ent && (agoraMin + 1440 - ent < 1440)) agoraMin += 1440;
                 
-                if (alms !== null && alme !== null) {
-                    trabalhado = (alms - ent) + (agoraMin - alme);
-                } else {
-                    trabalhado = agoraMin - ent;
-                }
+                if (alms !== null && alme !== null) trabalhado = (alms - ent) + (agoraMin - alme);
+                else if (alms !== null && alme === null) trabalhado = alms - ent;
+                else trabalhado = agoraMin - ent;
             }
 
             let meta = paraMinutos(metaJornadaStr);
@@ -439,22 +442,96 @@
 
             if (log.saida) {
                 saldo = trabalhado - meta;
-                // Aplicação Prática da Regra de Tolerância do Art. 58 da CLT (máximo 10 minutos por dia)
                 if (usarTolerancia === "1" && Math.abs(saldo) <= 10) {
                     saldo = 0;
-                    trabalhado = meta; // Ajusta visualmente para a meta contratual
+                    trabalhado = meta;
                 }
             }
-
             return { trabalhado, saldo };
         }
 
-        // --- RENDERIZADOR COMPLETO DA INTERFACE ---
+        // MOTOR DEFINITIVO: Cálculo de Progresso, Tempo Restante e Saída Estimada
+        async function calcularProgressoETempoRestante() {
+            const logHoje = await dbGetPonto(hojeStr);
+            const container = document.getElementById('progressoContainer');
+            
+            if (!logHoje || !logHoje.entrada) {
+                container.style.display = 'none';
+                document.getElementById('dashSaida').innerText = '--:--';
+                return;
+            }
+
+            container.style.display = 'block';
+            let ent = paraMinutos(logHoje.entrada);
+            let alms = paraMinutos(logHoje.almoco_saida);
+            let alme = paraMinutos(logHoje.almoco_entrada);
+            let meta = paraMinutos(appConfig.jornada || "08:00");
+
+            const agora = new Date();
+            let agoraMin = agora.getHours() * 60 + agora.getMinutes();
+
+            if (alms !== null && alms < ent) alms += 1440;
+            if (alme !== null && alme < ent) alme += 1440;
+            if (agoraMin < ent && (agoraMin + 1440 - ent < 1440)) agoraMin += 1440;
+
+            // Determinar o intervalo de almoço real ou estimado (1h padrão se não tirou)
+            let intervalo = 60;
+            if (alms !== null && alme !== null) intervalo = alme - alms;
+            else if (alms !== null && alme === null) intervalo = agoraMin - alms;
+
+            // Previsão Exata de Saída
+            let saidaEstimadaMin = ent + meta + intervalo;
+            if (saidaEstimadaMin >= 1440) saidaEstimadaMin -= 1440;
+            
+            document.getElementById('dashSaida').innerText = minsToHHMM(saidaEstimadaMin);
+
+            // Tempo trabalhado até o momento
+            const calculo = analisarMinutos(logHoje, appConfig.jornada, appConfig.tolerancia);
+            document.getElementById('dashHoje').innerText = minsToHHMM(calculo.trabalhado);
+
+            // Atualiza a Barra Gráfica
+            let pct = (calculo.trabalhado / meta) * 100;
+            if (pct > 100) pct = 100;
+            document.getElementById('progressBarFill').style.width = `${pct}%`;
+            document.getElementById('progressPctText').innerText = `${Math.floor(pct)}% Concluído`;
+
+            // Tempo Restante Dinâmico / Hora Extra
+            let restante = meta - calculo.trabalhado;
+            const textRestante = document.getElementById('progressRemainingText');
+            if (restante > 0) {
+                let r_h = Math.floor(restante / 60).toString().padStart(2, '0');
+                let r_m = (restante % 60).toString().padStart(2, '0');
+                textRestante.innerText = `${r_h}h ${r_m}min restante`;
+                textRestante.style.color = 'var(--texto-secundario)';
+            } else {
+                textRestante.innerText = `Hora Extra ativa!`;
+                textRestante.style.color = 'var(--sucesso)';
+            }
+        }
+
+        async function atualizarCronometroAlmoco() {
+            const logHoje = await dbGetPonto(hojeStr);
+            const banner = document.getElementById('lunchBanner');
+            
+            if (logHoje && logHoje.almoco_saida && !logHoje.almoco_entrada) {
+                banner.style.display = 'flex';
+                const [h, m] = logHoje.almoco_saida.split(':').map(Number);
+                const idaAlmoco = new Date();
+                idaAlmoco.setHours(h, m, 0);
+
+                const diff = Date.now() - idaAlmoco.getTime();
+                const mm = Math.floor(diff / 60000).toString().padStart(2, '0');
+                const ss = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                document.getElementById('lunchClock').innerText = `${mm}:${ss}`;
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
         async function render() {
             const todos = await dbGetAllPontos();
             const logHoje = await dbGetPonto(hojeStr) || {};
 
-            // Atualiza botões
             document.getElementById('p-entrada').disabled = !!logHoje.entrada;
             document.getElementById('p-almoco_saida').disabled = !logHoje.entrada || !!logHoje.almoco_saida;
             document.getElementById('p-almoco_entrada').disabled = !logHoje.almoco_saida || !!logHoje.almoco_entrada;
@@ -468,17 +545,11 @@
 
             let saldoAcumuladoTotal = 0;
             
-            // Ordenação Decrescente das Datas
             todos.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach(p => {
                 const calc = analisarMinutos(p, appConfig.jornada, appConfig.tolerancia);
                 saldoAcumuladoTotal += calc.saldo;
 
-                // Aplicar Filtro Mensal se selecionado
                 if (filterMonth !== 'todos' && !p.data.startsWith(filterMonth)) return;
-
-                if (p.data === hojeStr) {
-                    document.getElementById('dashHoje').innerText = minsToHHMM(calc.trabalhado);
-                }
 
                 const tr = document.createElement('tr');
                 const dFormated = p.data.split('-').reverse().join('/');
@@ -492,10 +563,10 @@
                     <td style="font-family:monospace; font-size:0.85rem;">${pontosTexto}</td>
                     <td style="font-family:monospace; font-weight:700;">${minsToHHMM(calc.trabalhado)}</td>
                     <td><span class="badge ${classeSaldo}">${sinal}${minsToHHMM(Math.abs(calc.saldo))}</span></td>
-                    <td><span class="badge info"><i class="fa-solid fa-location-dot"></i> ${p.geo || 'Manual/Nenhum'}</span></td>
+                    <td><span class="badge info"><i class="fa-solid fa-location-dot"></i> ${p.geo || 'Manual'}</span></td>
                     <td>
-                        <button class="btn-icon" onclick="carregarParaEditar('${p.data}')" title="Editar Batidas"><i class="fa-solid fa-pen" style="font-size:0.75rem;"></i></button>
-                        <button class="btn-icon" onclick="deletarRegistro('${p.data}')" style="color:var(--perigo);" title="Excluir Dia"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i></button>
+                        <button class="btn-icon" onclick="carregarParaEditar('${p.data}')" title="Editar"><i class="fa-solid fa-pen" style="font-size:0.75rem;"></i></button>
+                        <button class="btn-icon" onclick="deletarRegistro('${p.data}')" style="color:var(--perigo);" title="Excluir"><i class="fa-solid fa-trash" style="font-size:0.75rem;"></i></button>
                     </td>
                 `;
                 lista.appendChild(tr);
@@ -504,9 +575,9 @@
             const dashBanco = document.getElementById('dashBanco');
             dashBanco.innerText = `${saldoAcumuladoTotal >= 0 ? '+' : '-'}${minsToHHMM(Math.abs(saldoAcumuladoTotal))}`;
             dashBanco.className = saldoAcumuladoTotal >= 0 ? 'val-positivo' : 'val-negativo';
+            calcularProgressoETempoRestante();
         }
 
-        // --- OPERAÇÕES E FORMULÁRIOS RETROATIVOS ---
         async function salvarManual(e) {
             e.preventDefault();
             const dt = document.getElementById('m-data').value;
@@ -521,13 +592,12 @@
                 geo: "Ajuste Manual"
             };
 
-            // Remove propriedades nulas
             Object.keys(p).forEach(key => p[key] === null && delete p[key]);
 
             await dbSavePonto(p);
             document.getElementById('formManual').reset();
             await render();
-            alert('Folha de ponto atualizada com sucesso!');
+            alert('Folha de ponto atualizada!');
         }
 
         async function carregarParaEditar(dataStr) {
@@ -542,7 +612,7 @@
         }
 
         async function deletarRegistro(dataStr) {
-            if (confirm(`Tem certeza absoluta de que deseja remover o registro do dia ${dataStr.split('-').reverse().join('/')}?`)) {
+            if (confirm(`Remover o registro do dia ${dataStr.split('-').reverse().join('/')}?`)) {
                 await dbDeletePonto(dataStr);
                 await render();
             }
@@ -555,32 +625,6 @@
             await render();
         }
 
-        // --- CRONÔMETRO DE ALMOÇO REALTIME ---
-        let lunchTimerInterval;
-        function initLunchRealtimeTimer() {
-            clearInterval(lunchTimerInterval);
-            const banner = document.getElementById('lunchBanner');
-            
-            dbGetPonto(hojeStr).then(logHoje => {
-                if (logHoje && logHoje.almoco_saida && !logHoje.almoco_entrada) {
-                    banner.style.display = 'flex';
-                    const [h, m] = logHoje.almoco_saida.split(':').map(Number);
-                    const idaAlmoco = new Date();
-                    idaAlmoco.setHours(h, m, 0);
-
-                    lunchTimerInterval = setInterval(() => {
-                        const diff = Date.now() - idaAlmoco.getTime();
-                        const mm = Math.floor(diff / 60000).toString().padStart(2, '0');
-                        const ss = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-                        document.getElementById('lunchClock').innerText = `${mm}:${ss}`;
-                    }, 1000);
-                } else {
-                    banner.style.display = 'none';
-                }
-            });
-        }
-
-        // --- CONVERSORES AUXILIARES ---
         function minsToHHMM(totMins) {
             const h = Math.floor(totMins / 60).toString().padStart(2, '0');
             const m = (totMins % 60).toString().padStart(2, '0');
@@ -589,7 +633,7 @@
 
         function buildMonthFilter() {
             const sel = document.getElementById('filterMonth');
-            sel.innerHTML = '<option value="todos">Exibir Todo o Histórico</option>';
+            sel.innerHTML = '<option value="todos">Todo o Histórico</option>';
             const hoje = new Date();
             for(let i=0; i<6; i++) {
                 const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
@@ -611,39 +655,34 @@
             ico.className = appConfig.theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
         }
 
-        // --- EXPORTAR E IMPORTAR COPIAS DE SEGURANÇA JURÍDICA ---
         async function exportarBackup() {
             const pontos = await dbGetAllPontos();
             const config = await dbGetConfig();
             const payload = { pontos, config };
-            
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `pontofacil_ultra_backup_${hojeStr}.json`;
+            a.download = `pontofacil_backup_${hojeStr}.json`;
             a.click();
         }
 
         function importarBackup(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const r = new FileReader();
             r.onload = async (evt) => {
                 try {
                     const data = JSON.parse(evt.target.result);
                     if (data.pontos && data.config) {
-                        // Limpa e Restaura as Tabelas do IndexedDB
                         let txP = db.transaction('pontos', 'readwrite');
                         txP.objectStore('pontos').clear();
                         data.pontos.forEach(p => txP.objectStore('pontos').put(p));
-
                         await dbSaveConfig(data.config);
-                        alert('Base de dados restaurada com sucesso operacional absoluto!');
+                        alert('Dados restaurados com sucesso!');
                         window.location.reload();
-                    } else { alert('Estrutura de arquivo inválida.'); }
-                } catch(err) { alert('Erro ao processar arquivo JSON.'); }
+                    } else { alert('Arquivo inválido.'); }
+                } catch(err) { alert('Erro ao processar JSON.'); }
             };
             r.readAsText(file);
         }
