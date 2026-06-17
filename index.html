@@ -15,7 +15,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Scripts Modulares de Expansão -->
   <script src="./integrity.js"></script>
   <script src="./exporter.js"></script>
 
@@ -156,7 +155,7 @@
       background: var(--surface-accent);
       border-radius: 10px;
       overflow: hidden;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .progress-bar {
@@ -175,6 +174,25 @@
     .context-status span {
       color: var(--text);
       font-weight: 600;
+    }
+
+    .previsao-container {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .previsao-tag {
+      color: #22d3ee;
+      font-weight: 700;
+      background: rgba(34, 211, 238, 0.1);
+      padding: 3px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(34, 211, 238, 0.2);
     }
 
     .actions-grid {
@@ -364,6 +382,9 @@
         <div class="progress-bar" id="main-progress"></div>
       </div>
       <div class="context-status" id="context-status">Status: <span>Disponível</span></div>
+      <div class="previsao-container">
+        Previsão de Saída: <span class="previsao-tag" id="previsao-saida-texto">--:--</span>
+      </div>
     </div>
 
     <div class="actions-grid">
@@ -391,7 +412,7 @@
         <h3 id="metric-almoco">00:00</h3>
       </div>
       <div class="metric-card">
-        <p>Banco</p>
+        <p>Banco (8h30)</p>
         <h3 id="metric-banco">00:00</h3>
       </div>
     </div>
@@ -400,10 +421,37 @@
       <div class="history-header">
         <h2>Registros de Hoje</h2>
         <div class="history-actions">
+          <button class="btn-secondary" onclick="toggleAjusteManual()" title="Ajuste Manual"><i class="fa-solid fa-plus"></i></button>
           <button class="btn-secondary" onclick="exportarDados()"><i class="fa-solid fa-file-excel"></i></button>
           <button class="btn-secondary" onclick="limparHistorico()"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
+
+      <div id="ajuste-manual-container" style="display: none; flex-direction: column; gap: 10px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; border: 1px dashed var(--surface-accent);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Tipo</label>
+            <select id="manual-tipo" style="width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--surface-accent); color: var(--text); border-radius: 8px; font-weight: 500;">
+              <option value="Entrada">Entrada</option>
+              <option value="Almoço Saída">Almoço Saída</option>
+              <option value="Almoço Retorno">Almoço Retorno</option>
+              <option value="Saída">Saída</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Horário</label>
+            <input type="time" id="manual-hora" style="width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--surface-accent); color: var(--text); border-radius: 8px; font-variant-numeric: tabular-nums;">
+          </div>
+        </div>
+        <div>
+          <label style="font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px;">Data</label>
+          <div style="display: flex; gap: 10px;">
+            <input type="date" id="manual-data" style="flex: 1; padding: 10px; background: var(--bg); border: 1px solid var(--surface-accent); color: var(--text); border-radius: 8px;">
+            <button class="btn-secondary" onclick="salvarPontoManual()" style="background: var(--primary); padding: 0 15px; font-weight: 600; border-radius: 8px;">Inserir</button>
+          </div>
+        </div>
+      </div>
+
       <div class="history-list" id="history-list"></div>
     </div>
   </div>
@@ -411,7 +459,8 @@
   <div class="toast" id="toast">Ponto registrado com sucesso!</div>
 
   <script>
-    const JORNADA_DIARIA_MINUTOS = 480;
+    // DEFINIÇÃO DA CARGA HORÁRIA: 8 horas e 30 minutos = 510 minutos
+    const JORNADA_DIARIA_MINUTOS = 510; 
     let registros = JSON.parse(localStorage.getItem('pontofacil_registros')) || [];
     const somClique = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV92T19sAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGw=");
 
@@ -444,6 +493,55 @@
       mostrarToast(`Registrado: ${tipo} às ${horaFormatada}`);
       renderizarHistorico();
       calcularMetricas();
+    }
+
+    function toggleAjusteManual() {
+      const container = document.getElementById('ajuste-manual-container');
+      if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'flex';
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        document.getElementById('manual-data').value = `${ano}-${mes}-${dia}`;
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    async function salvarPontoManual() {
+      const tipo = document.getElementById('manual-tipo').value;
+      const horaInput = document.getElementById('manual-hora').value;
+      const dataInput = document.getElementById('manual-data').value;
+
+      if (!horaInput || !dataInput) {
+        mostrarToast("Preencha o horário e a data!");
+        return;
+      }
+
+      const partesData = dataInput.split('-');
+      const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+      const dataHoraObjeto = new Date(`${dataInput}T${horaInput}:00`);
+      const timestamp = dataHoraObjeto.getTime();
+      const horaFormatada = horaInput + ":00";
+
+      let novoRegistro = { tipo, hora: horaFormatada, data: dataFormatada, timestamp };
+
+      if (typeof gerarAssinaturaDigital === 'function') {
+        novoRegistro.assinatura = await gerarAssinaturaDigital(novoRegistro);
+      }
+
+      registros.unshift(novoRegistro);
+      registros.sort((a, b) => b.timestamp - a.timestamp);
+      
+      localStorage.setItem('pontofacil_registros', JSON.stringify(registros));
+
+      mostrarToast(`Inserido: ${tipo} às ${horaInput}`);
+      renderizarHistorico();
+      calcularMetricas();
+      
+      document.getElementById('manual-hora').value = '';
+      document.getElementById('ajuste-manual-container').style.display = 'none';
     }
 
     function mostrarToast(mensagem) {
@@ -489,9 +587,17 @@
       let minutosTrabalhados = 0;
       let minutosAlmoco = 0;
       let statusAtual = "Disponível";
+      let previsaoSaida = "--:--";
+
+      // Captura os marcos temporais para o cálculo da previsão
+      const entrada = pontosHoje.find(r => r.tipo === 'Entrada');
+      const almocoSaida = pontosHoje.find(r => r.tipo === 'Almoço Saída');
+      const almocoRetorno = pontosHoje.find(r => r.tipo === 'Almoço Retorno');
+      const saida = pontosHoje.find(r => r.tipo === 'Saída');
 
       if (pontosHoje.length > 0) {
         statusAtual = pontosHoje[pontosHoje.length - 1].tipo;
+        
         for (let i = 0; i < pontosHoje.length; i++) {
           if (pontosHoje[i].tipo === 'Entrada' && pontosHoje[i+1] && pontosHoje[i+1].tipo === 'Almoço Saída') {
             minutosTrabalhados += Math.round((pontosHoje[i+1].timestamp - pontosHoje[i].timestamp) / 60000);
@@ -503,11 +609,38 @@
             minutosTrabalhados += Math.round((pontosHoje[i+1].timestamp - pontosHoje[i].timestamp) / 60000);
           }
         }
+
+        // MOTOR DE PREVISÃO AUTOMÁTICA INTELIGENTE (Baseado em 8h30 de Carga)
+        if (entrada) {
+          let timestampPrevisao = 0;
+
+          if (almocoRetorno) {
+            // CENÁRIO PERFEITO: Já voltou do almoço.
+            // Hora de Saída = Hora de Retorno + (8h30 - Tempo trabalhado de manhã)
+            let tempoAntesAlmoco = Math.round((almocoSaida.timestamp - entrada.timestamp) / 60000);
+            let tempoRestante = JORNADA_DIARIA_MINUTOS - tempoAntesAlmoco;
+            timestampPrevisao = almocoRetorno.timestamp + (tempoRestante * 60000);
+          } else if (almocoSaida) {
+            // Está almoçando: Presume que vai tirar 1 hora exata (60 min) de descanso
+            let tempoAntesAlmoco = Math.round((almocoSaida.timestamp - entrada.timestamp) / 60000);
+            let tempoRestante = JORNADA_DIARIA_MINUTOS - tempoAntesAlmoco;
+            timestampPrevisao = almocoSaida.timestamp + (60 * 60000) + (tempoRestante * 60000);
+          } else {
+            // Só iniciou o dia: Calcula 8h30 de jornada + 1h padrão de almoço (9h30 no total)
+            timestampPrevisao = entrada.timestamp + ((JORNADA_DIARIA_MINUTOS + 60) * 60000);
+          }
+
+          const dataPrevisao = new Date(timestampPrevisao);
+          previsaoSaida = dataPrevisao.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
       }
 
       document.getElementById('metric-hoje').innerText = formatarMinutos(minutosTrabalhados);
       document.getElementById('metric-almoco').innerText = formatarMinutos(minutosAlmoco);
       document.getElementById('context-status').innerHTML = `Status: <span>${statusAtual}</span>`;
+      
+      // Se você já bateu a saída final, fixa o horário real batido, senão mostra a previsão calculada
+      document.getElementById('previsao-saida-texto').innerText = saida ? saida.hora.substring(0,5) : previsaoSaida;
 
       let saldoBanco = minutosTrabalhados - JORNADA_DIARIA_MINUTOS;
       if (pontosHoje.length < 4 && !statusAtual.includes('Saída')) saldoBanco = 0;
@@ -532,7 +665,8 @@
       let entrada = pontosHoje[0].timestamp;
       let agora = new Date().getTime();
       let decorrido = Math.round((agora - entrada) / 60000);
-      let porc = Math.min(100, Math.max(0, (decorrido / 540) * 100));
+      // Barra de progresso baseada no teto de 9h30 totais de permanência na empresa
+      let porc = Math.min(100, Math.max(0, (decorrido / 570) * 100));
       document.getElementById('main-progress').style.width = `${porc}%`;
     }
 
