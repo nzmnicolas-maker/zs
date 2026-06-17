@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pontofacil-ultra-v1';
+const CACHE_NAME = 'pontofacil-ultra-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -6,15 +6,14 @@ const ASSETS_TO_CACHE = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
 ];
 
-// Instalação - Salva os arquivos essenciais de forma segura
+// Instalação do Service Worker - Cache Seguro
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Mapeia os arquivos individualmente com tratamento de erro para evitar quebras no build
       return Promise.all(
         ASSETS_TO_CACHE.map((asset) => {
           return cache.add(asset).catch((err) => {
-            console.warn(`Aviso de Cache: Não foi possível pré-carregar o recurso: ${asset}`, err);
+            console.warn(`Aviso de pré-carregamento omitido para segurança: ${asset}`, err);
           });
         })
       );
@@ -22,7 +21,7 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Ativação - Limpa caches antigos automaticamente ao atualizar o sistema
+// Ativação - Limpeza de Caches antigos de versões passadas
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -37,9 +36,8 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interceptação de Requisições - Estratégia de Autocorreção Offline
+// Interceptação de Requisições - Cache Inteligente com Fallback Dinâmico
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições que não sejam GET ou de protocolos estranhos (extensões, etc)
   if (event.request.method !== 'GET' || (!event.request.url.startsWith(self.location.origin) && !event.request.url.includes('cdnjs.cloudflare.com'))) {
     return;
   }
@@ -47,7 +45,6 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Se a resposta da rede for válida, clona e atualiza o cache em segundo plano
         if (networkResponse && networkResponse.status === 200) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -57,16 +54,29 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(() => {
-        // Modo Offline ativo: Busca o recurso no banco de dados de cache
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // Fallback para a página inicial caso seja uma navegação principal perdida
           if (event.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
         });
       })
+  );
+});
+
+// MOTOR DE NOTIFICAÇÕES: Gerencia cliques em mensagens do sistema
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close(); // Fecha a notificação visual
+
+  // Foca na janela aberta do PontoFácil ou abre uma nova se estiver fechada
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      if (clientList.length > 0) {
+        return clientList[0].focus();
+      }
+      return clients.openWindow('./index.html');
+    })
   );
 });
