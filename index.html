@@ -15,6 +15,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Scripts Modulares de Expansão -->
+  <script src="./integrity.js"></script>
+  <script src="./exporter.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -107,7 +111,6 @@
       display: inline-block;
     }
 
-    /* Card Principal de Tempo */
     .hero-card {
       background: var(--surface);
       border-radius: var(--radius);
@@ -174,7 +177,6 @@
       font-weight: 600;
     }
 
-    /* Grid de Ações Magnéticas */
     .actions-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -211,7 +213,6 @@
     .btn-almoco-retorno:hover, .btn-almoco-retorno.active { border-color: var(--primary); color: var(--primary); background: rgba(99, 102, 241, 0.05); }
     .btn-saida:hover, .btn-saida.active { border-color: var(--danger); color: var(--danger); background: rgba(244, 63, 94, 0.05); }
 
-    /* Métricas Rápidas */
     .metrics-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -237,7 +238,6 @@
       font-weight: 700;
     }
 
-    /* Histórico Inteligente */
     .history-section {
       background: var(--surface);
       border-radius: var(--radius);
@@ -320,12 +320,10 @@
       font-variant-numeric: tabular-nums;
     }
 
-    /* Custom Scrollbar */
     .history-list::-webkit-scrollbar { width: 5px; }
     .history-list::-webkit-scrollbar-track { background: transparent; }
     .history-list::-webkit-scrollbar-thumb { background: var(--surface-accent); border-radius: 10px; }
 
-    /* Toast Notification System */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -402,47 +400,44 @@
       <div class="history-header">
         <h2>Registros de Hoje</h2>
         <div class="history-actions">
-          <button class="btn-secondary" onclick="exportarDados()"><i class="fa-solid fa-download"></i></button>
+          <button class="btn-secondary" onclick="exportarDados()"><i class="fa-solid fa-file-excel"></i></button>
           <button class="btn-secondary" onclick="limparHistorico()"><i class="fa-solid fa-trash"></i></button>
         </div>
       </div>
-      <div class="history-list" id="history-list">
-        </div>
+      <div class="history-list" id="history-list"></div>
     </div>
   </div>
 
   <div class="toast" id="toast">Ponto registrado com sucesso!</div>
 
   <script>
-    // Configurações do App
-    const JORNADA_DIARIA_MINUTOS = 480; // 8 Horas
+    const JORNADA_DIARIA_MINUTOS = 480;
     let registros = JSON.parse(localStorage.getItem('pontofacil_registros')) || [];
-
-    // Áudio de Feedback Tátil/Sonoro Embutido (Base64 para rodar offline perfeitamente)
     const somClique = new Audio("data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YV92T19sAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGwAbABsAGw=");
 
-    // Relógio de Alta Precisão
     function atualizarRelogio() {
       const agora = new Date();
       const opcoesData = { weekday: 'long', day: 'numeric', month: 'short' };
-      
       document.getElementById('current-date').innerText = agora.toLocaleDateString('pt-BR', opcoesData);
       document.getElementById('current-time').innerText = agora.toLocaleTimeString('pt-BR', { hour12: false });
-      
       atualizarProgressoDiario();
     }
     setInterval(atualizarRelogio, 1000);
     atualizarRelogio();
 
-    // Sistema de Registro de Ponto Inteligente
-    function baterPonto(tipo) {
+    async function baterPonto(tipo) {
       try { somClique.play(); } catch(e){}
       
       const agora = new Date();
       const horaFormatada = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const dataFormatada = agora.toLocaleDateString('pt-BR');
 
-      const novoRegistro = { tipo, hora: horaFormatada, data: dataFormatada, timestamp: agora.getTime() };
+      let novoRegistro = { tipo, hora: horaFormatada, data: dataFormatada, timestamp: agora.getTime() };
+      
+      if (typeof gerarAssinaturaDigital === 'function') {
+        novoRegistro.assinatura = await gerarAssinaturaDigital(novoRegistro);
+      }
+
       registros.unshift(novoRegistro);
       localStorage.setItem('pontofacil_registros', JSON.stringify(registros));
 
@@ -451,28 +446,25 @@
       calcularMetricas();
     }
 
-    // Gerador de Feedbacks Visuais (Toasts)
     function mostrarToast(mensagem) {
       const toast = document.getElementById('toast');
-      toast.innerText = mensaje || mensagem;
+      toast.innerText = mensagem;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3500);
     }
 
-    // Renderizador do Histórico Dinâmico
     function renderizarHistorico() {
       const lista = document.getElementById('history-list');
       lista.innerHTML = '';
 
       if (registros.length === 0) {
-        lista.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; padding: 20px;">Nenhum ponto registrado hoje.</div>`;
+        lista.innerHTML = `<div style="text-align:center; color:var(--text-muted); font-size:13px; padding: 20px;">Nenhum ponto registrado.</div>`;
         return;
       }
 
       registros.forEach(reg => {
         const item = document.createElement('div');
         item.className = 'history-item';
-        
         let corBorda = 'var(--primary)';
         if (reg.tipo.includes('Entrada')) corBorda = 'var(--success)';
         if (reg.tipo.includes('Saída')) corBorda = 'var(--danger)';
@@ -490,7 +482,6 @@
       });
     }
 
-    // Cálculo Analítico de Horas e Barra de Progresso
     function calcularMetricas() {
       const hoje = new Date().toLocaleDateString('pt-BR');
       const pontosHoje = registros.filter(r => r.data === hoje).reverse();
@@ -501,8 +492,6 @@
 
       if (pontosHoje.length > 0) {
         statusAtual = pontosHoje[pontosHoje.length - 1].tipo;
-        
-        // Regras de cálculo sequencial de tempos
         for (let i = 0; i < pontosHoje.length; i++) {
           if (pontosHoje[i].tipo === 'Entrada' && pontosHoje[i+1] && pontosHoje[i+1].tipo === 'Almoço Saída') {
             minutosTrabalhados += Math.round((pontosHoje[i+1].timestamp - pontosHoje[i].timestamp) / 60000);
@@ -516,14 +505,12 @@
         }
       }
 
-      // Atualiza painéis na tela
       document.getElementById('metric-hoje').innerText = formatarMinutos(minutosTrabalhados);
       document.getElementById('metric-almoco').innerText = formatarMinutos(minutosAlmoco);
       document.getElementById('context-status').innerHTML = `Status: <span>${statusAtual}</span>`;
 
-      // Cálculo de Banco de Horas Estilizado
       let saldoBanco = minutosTrabalhados - JORNADA_DIARIA_MINUTOS;
-      if (pontosHoje.length < 4 && !statusAtual.includes('Saída')) saldoBanco = 0; // Só fecha saldo ao terminar o dia
+      if (pontosHoje.length < 4 && !statusAtual.includes('Saída')) saldoBanco = 0;
       
       const sinal = saldoBanco >= 0 ? "+" : "";
       document.getElementById('metric-banco').innerText = sinal + formatarMinutos(saldoBanco);
@@ -545,21 +532,17 @@
       let entrada = pontosHoje[0].timestamp;
       let agora = new Date().getTime();
       let decorrido = Math.round((agora - entrada) / 60000);
-      let porc = Math.min(100, Math.max(0, (decorrido / 540) * 100)); // Baseado em 9h de janela total
+      let porc = Math.min(100, Math.max(0, (decorrido / 540) * 100));
       document.getElementById('main-progress').style.width = `${porc}%`;
     }
 
-    // Exportação Segura de Dados (Backup)
     function exportarDados() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(registros, null, 2));
-      const dlAnchorElem = document.createElement('a');
-      dlAnchorElem.setAttribute("href", dataStr);
-      dlAnchorElem.setAttribute("download", `pontofacil_backup.json`);
-      dlAnchorElem.click();
-      mostrarToast("Backup exportado!");
+      if (typeof exportarParaExcel === 'function') {
+        exportarParaExcel(registros);
+        mostrarToast("Relatório Excel (CSV) baixado!");
+      }
     }
 
-    // Reset de Fábrica do Histórico
     function limparHistorico() {
       if (confirm("Deseja apagar permanentemente todos os registros salvos?")) {
         registros = [];
@@ -570,47 +553,47 @@
       }
     }
 
-    // DECODIFICADOR DE ATALHOS NATIVOS (Tratamento das URLs vindas do Manifest)
     function processarAtalhosURL() {
       const urlParams = new URLSearchParams(window.location.search);
       const acao = urlParams.get('action');
-      
       if (acao) {
-        // Limpa os parâmetros da URL para evitar múltiplos registros ao dar F5
         window.history.replaceState({}, document.title, window.location.pathname);
-        
         setTimeout(() => {
           if (acao === 'entrada') baterPonto('Entrada');
           if (acao === 'almoco_saida') baterPonto('Almoço Saída');
           if (acao === 'almoco_retorno') baterPonto('Almoço Retorno');
           if (acao === 'saida') baterPonto('Saída');
-        }, 600); // Pequeno delay de carregamento estético
+        }, 600);
       }
     }
 
-    // Monitoramento de Conectividade
     window.addEventListener('online', () => {
-      const status = document.getElementById('app-status');
-      status.innerText = "Online";
-      status.style.borderColor = "var(--success)";
+      document.getElementById('app-status').innerText = "Online";
+      document.getElementById('app-status').style.borderColor = "var(--success)";
     });
     window.addEventListener('offline', () => {
-      const status = document.getElementById('app-status');
-      status.innerText = "Offline";
-      status.style.borderColor = "var(--warning)";
+      document.getElementById('app-status').innerText = "Offline";
+      document.getElementById('app-status').style.borderColor = "var(--warning)";
     });
 
-    // Inicialização do Ecossistema
     window.addEventListener('DOMContentLoaded', () => {
       renderizarHistorico();
       calcularMetricas();
       processarAtalhosURL();
 
-      // Registro do Service Worker Inteligente
+      if (typeof verificarIntegridadeDosDados === 'function') {
+        verificarIntegridadeDosDados(registros).then(valido => {
+          if (!valido && registros.length > 0) {
+            document.getElementById('context-status').innerHTML = `Status: <span style="color:var(--danger)">⚠️ ADULTERADO!</span>`;
+            mostrarToast("Aviso: Detecção de dados violados no navegador!");
+          }
+        });
+      }
+
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
-          .then(() => console.log('Engenharia Core: Service Worker Ativo e Operando.'))
-          .catch(err => console.error('Erro de Inércia do SW:', err));
+          .then(() => console.log('Engenharia Core ativa.'))
+          .catch(err => console.error(err));
       }
     });
   </script>
