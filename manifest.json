@@ -1,12 +1,13 @@
 {
-  "name": "PontoFácil - Controle de Jornada",
+  "name": "PontoFácil Premium - Controle de Jornada",
   "short_name": "PontoFácil",
-  "description": "Seu controle de ponto eletrônico e banco de horas inteligente.",
+  "description": "Sistema ultra-inteligente de gestão de ponto eletrônico, banco de horas e métricas de produtividade.",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0b0f19",
-  "theme_color": "#151b2c",
+  "background_color": "#0f172a",
+  "theme_color": "#1e293b",
   "orientation": "portrait",
+  "categories": ["business", "utilities"],
   "icons": [
     {
       "src": "https://img.icons8.com/fluent/192/ffffff/clock.png",
@@ -25,21 +26,28 @@
     {
       "name": "Registrar Entrada",
       "short_name": "Entrada",
-      "description": "Bater o ponto de entrada inicial",
+      "description": "Bater o ponto de início de expediente",
       "url": "./index.html?action=entrada",
       "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/login-rounded-right.png", "sizes": "96x96" }]
     },
     {
-      "name": "Iniciar Almoço",
+      "name": "Ir para Almoço",
       "short_name": "Almoço",
       "description": "Registrar saída para o intervalo",
       "url": "./index.html?action=almoco_saida",
       "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/restaurant.png", "sizes": "96x96" }]
     },
     {
+      "name": "Voltar do Almoço",
+      "short_name": "Retorno",
+      "description": "Registrar retorno do intervalo",
+      "url": "./index.html?action=almoco_retorno",
+      "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/dinner.png", "sizes": "96x96" }]
+    },
+    {
       "name": "Finalizar Expediente",
       "short_name": "Saída",
-      "description": "Registrar saída final do dia",
+      "description": "Registrar encerramento do dia",
       "url": "./index.html?action=saida",
       "icons": [{ "src": "https://img.icons8.com/fluent/96/ffffff/logout-rounded-left.png", "sizes": "96x96" }]
     }
