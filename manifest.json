@@ -1,7 +1,7 @@
 {
   "name": "PontoFácil Premium - Controle de Jornada",
   "short_name": "PontoFácil",
-  "description": "Sistema ultra-inteligente de gestão de ponto eletrônico, banco de horas e métricas de produtividade.",
+  "description": "Sistema inteligente de gestão de ponto eletrônico, banco de horas e métricas de produtividade.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
