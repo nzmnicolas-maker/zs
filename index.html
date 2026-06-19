@@ -7,36 +7,44 @@
     <style>
         /* Variáveis de Cores para Temas (Claro/Escuro) */
         :root {
-            --bg-body: #f5f5f5;
+            --bg-body: #f8fafc;
             --bg-container: #ffffff;
-            --text-main: #282828;
-            --text-muted: #666666;
-            --border-color: #dddddd;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
             --input-bg: #ffffff;
             
             --navy: #0a2240;
             --cyan-blue: #00e5ff;
             --white: #ffffff;
-            --green: #228b22;
-            --shadow: rgba(0, 0, 0, 0.1);
+            --green: #10b981;
+            --orange: #f97316;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --btn-action-bg: #00e5ff;
+            --btn-action-text: #0a2240;
         }
 
         body.dark-mode {
-            --bg-body: #0f172a;
-            --bg-container: #1e293b;
+            --bg-body: #090d16;
+            --bg-container: #131c2e;
             --text-main: #f8fafc;
             --text-muted: #94a3b8;
-            --border-color: #334155;
-            --input-bg: #1e293b;
+            --border-color: #1e293b;
+            --input-bg: #1c283d;
             --shadow: rgba(0, 0, 0, 0.3);
+            --btn-action-bg: #00e5ff;
+            --btn-action-text: #0a2240;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.4s ease;
         }
 
         body {
@@ -50,29 +58,30 @@
         }
 
         .container {
-            max-width: 500px;
+            max-width: 480px;
             width: 100%;
             background: var(--bg-container);
             padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px var(--shadow);
-            margin-bottom: 80px; /* Espaço para a barra flutuante */
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            margin-bottom: 90px;
+            position: relative;
         }
 
-        /* Painel de Cadastro e Perfil */
+        /* Painel de Perfil Fluido */
         .profile-panel {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(0,0,0,0.03);
+            background: rgba(0, 0, 0, 0.02);
             padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+            border-radius: 16px;
+            margin-bottom: 25px;
             border: 1px solid var(--border-color);
         }
 
         body.dark-mode .profile-panel {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .profile-info {
@@ -84,13 +93,19 @@
 
         .avatar-wrapper {
             position: relative;
-            width: 55px;
-            height: 55px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             border: 2px solid var(--cyan-blue);
             overflow: hidden;
             cursor: pointer;
-            background: #ccc;
+            background: #cbd5e1;
+            transform: scale(1);
+            transition: transform 0.2s ease;
+        }
+
+        .avatar-wrapper:hover {
+            transform: scale(1.05);
         }
 
         .avatar-wrapper img {
@@ -105,7 +120,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
             background: var(--navy);
             color: white;
         }
@@ -115,7 +130,7 @@
             border: none;
             border-bottom: 1px dashed var(--text-muted);
             color: var(--text-main);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             padding: 4px;
             width: 80%;
@@ -127,56 +142,127 @@
             border-bottom-color: var(--cyan-blue);
         }
 
-        /* Botão Alternador de Tema */
         .btn-theme {
             background: transparent;
             border: none;
             font-size: 22px;
             cursor: pointer;
-            padding: 5px;
+            padding: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-theme:hover {
-            background: rgba(0,0,0,0.05);
-        }
-        body.dark-mode .btn-theme:hover {
-            background: rgba(255,255,255,0.1);
+        .btn-theme:active {
+            transform: scale(0.85) rotate(45deg);
         }
 
         h1 {
             color: var(--navy);
             text-align: center;
             margin-bottom: 20px;
-            font-size: 24px;
+            font-size: 26px;
+            font-weight: 800;
         }
         body.dark-mode h1 {
-            color: var(--cyan-blue);
+            color: var(--white);
+        }
+
+        /* Grid de Informações Superiores */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .card-banco {
             background: var(--navy);
             color: var(--white);
-            padding: 15px;
-            border-radius: 10px;
+            padding: 14px;
+            border-radius: 14px;
             text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-            font-size: 18px;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+            font-size: 15px;
             border-left: 5px solid var(--cyan-blue);
+            box-shadow: 0 4px 12px rgba(10, 34, 64, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* NOVO: Card de Saída Destacado */
+        .card-saida-principal {
+            background: linear-gradient(135deg, var(--navy), #1e293b);
+            color: var(--white);
+            padding: 14px;
+            border-radius: 14px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 15px;
+            border-left: 5px solid var(--orange);
+            box-shadow: 0 4px 12px rgba(10, 34, 64, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-saida-principal span {
+            color: var(--cyan-blue);
+            font-size: 18px;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* Botão Mágico Instantâneo (Registrar Agora) */
+        .btn-instant {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: var(--btn-action-bg);
+            color: var(--btn-action-text);
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 14px rgba(0, 229, 255, 0.3);
+            transform: translateY(0);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+
+        .btn-instant:hover {
+            background: #00bcd4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.4);
+        }
+
+        .btn-instant:active {
+            transform: translateY(1px);
         }
 
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 16px;
+            padding: 8px;
+            border-radius: 10px;
+            border: 2px solid transparent;
+        }
+
+        .input-group.active-focus {
+            border-color: rgba(0, 229, 255, 0.4);
+            background: rgba(0, 229, 255, 0.02);
         }
 
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             font-weight: 600;
             color: var(--text-main);
             font-size: 14px;
@@ -184,24 +270,25 @@
 
         input[type="time"] {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: 2px solid var(--border-color);
             background-color: var(--input-bg);
             color: var(--text-main);
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
             outline: none;
+            font-weight: 500;
         }
 
         input[type="time"]:focus {
             border-color: var(--cyan-blue);
         }
 
-        /* Barra de Progresso */
+        /* Barra de Progresso Fluida com Efeito Pulsar */
         .progress-container {
             background: var(--border-color);
-            border-radius: 10px;
-            height: 20px;
+            border-radius: 12px;
+            height: 22px;
             width: 100%;
             margin: 25px 0 10px 0;
             overflow: hidden;
@@ -212,35 +299,51 @@
             background: linear-gradient(90deg, var(--navy), var(--cyan-blue));
             height: 100%;
             width: 0%;
-            transition: width 0.5s ease;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-bar.pulsing::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: progress-glow 2s infinite;
+        }
+
+        @keyframes progress-glow {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
 
         .progress-text {
             text-align: center;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 700;
             color: var(--text-main);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .btn-clear {
             display: block;
             width: 100%;
-            background: #e74c3c;
-            color: white;
-            border: none;
+            background: transparent;
+            color: #ef4444;
+            border: 1px solid #ef4444;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 14px;
+            transition: background-color 0.2s, color 0.2s;
         }
 
         .btn-clear:hover {
-            background: #c0392b;
+            background: #ef4444;
+            color: #ffffff;
         }
 
-        /* Linha Flutuante de Previsão de Saída (Azul-Ciano) */
+        /* Linha Flutuante Animada */
         .floating-prediction-bar {
             position: fixed;
             bottom: 0;
@@ -250,58 +353,72 @@
             border-top: 4px solid var(--cyan-blue);
             color: var(--white);
             text-align: center;
-            padding: 15px;
+            padding: 16px;
             font-size: 16px;
-            font-weight: bold;
-            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-            display: none;
+            font-weight: 700;
+            box-shadow: 0 -10px 25px rgba(0,0,0,0.2);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             z-index: 1000;
+        }
+
+        .floating-prediction-bar.visible {
+            transform: translateY(0);
         }
 
         .floating-prediction-bar span {
             color: var(--cyan-blue);
-            font-size: 18px;
+            font-size: 19px;
             margin-left: 5px;
+            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Painel de Cadastro Superior com Dark Mode -->
         <div class="profile-panel">
             <div class="profile-info">
-                <div class="avatar-wrapper" id="avatarBtn" title="Clique para alterar a foto">
+                <div class="avatar-wrapper" id="avatarBtn" title="Alterar foto de perfil">
                     <div id="avatarPlaceholder" class="avatar-placeholder">👤</div>
                     <img id="avatarImage" style="display: none;" alt="Foto de Perfil">
                 </div>
                 <input type="file" id="avatarInput" accept="image/*" style="display: none;">
-                <input type="text" id="inputNome" class="user-name-input" placeholder="Clique para digitar seu nome...">
+                <input type="text" id="inputNome" class="user-name-input" placeholder="Seu nome...">
             </div>
-            <button id="btnTheme" class="btn-theme" title="Alternar tema">🌙</button>
+            <button id="btnTheme" class="btn-theme" title="Mudar tema">🌙</button>
         </div>
 
         <h1>PontoFácil</h1>
         
-        <!-- Card com jornada dinâmica -->
-        <div id="cardBanco" class="card-banco">Banco (Carregando...)</div>
+        <div class="info-grid">
+            <div id="cardBanco" class="card-banco">Banco (Carregando...)</div>
+            <div class="card-saida-principal">
+                Horário de Saída
+                <span id="txtSaidaPrincipal">--:--</span>
+            </div>
+        </div>
 
-        <div class="input-group">
+        <button id="btnInstant" class="btn-instant">
+            ⏱️ Registrar Hora Atual
+        </button>
+
+        <div class="input-group" id="group_0">
             <label for="ponto1">1ª Batida - Entrada Manhã</label>
             <input type="time" id="ponto1">
         </div>
 
-        <div class="input-group">
+        <div class="input-group" id="group_1">
             <label for="ponto2">2ª Batida - Saída Almoço (Início)</label>
             <input type="time" id="ponto2">
         </div>
 
-        <div class="input-group">
+        <div class="input-group" id="group_2">
             <label for="ponto3">3ª Batida - Retorno Almoço (Fim)</label>
             <input type="time" id="ponto3">
         </div>
 
-        <div class="input-group">
+        <div class="input-group" id="group_3">
             <label for="ponto4">4ª Batida - Saída Final</label>
             <input type="time" id="ponto4">
         </div>
@@ -314,7 +431,6 @@
         <button class="btn-clear" id="btnLimpar">Limpar Registros</button>
     </div>
 
-    <!-- Linha Flutuante Azul-Ciano -->
     <div id="floatingBar" class="floating-prediction-bar">
         Previsão de Saída Estimada: <span id="previsaoHorario">--:--</span>
     </div>
