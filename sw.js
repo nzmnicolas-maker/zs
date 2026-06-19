@@ -1,4 +1,4 @@
-const CACHE_NAME = "pontofacil-v2"; // Incrementado para limpar o cache antigo do modelo de 4 pontos
+const CACHE_NAME = "pontofacil-saas-v1";
 const ASSETS = [
   "./",
   "./index.html",
@@ -6,7 +6,7 @@ const ASSETS = [
   "./manifest.json"
 ];
 
-// Instalação e armazenamento em Cache
+// Instala e força o novo cache
 self.addEventListener("install", (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -16,7 +16,7 @@ self.addEventListener("install", (e) => {
   self.skipWaiting();
 });
 
-// Limpeza de caches antigos automaticamente
+// Limpa caches antigos automaticamente para não dar conflito de layout
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -32,7 +32,7 @@ self.addEventListener("activate", (e) => {
   self.clients.claim();
 });
 
-// Estratégia: Tenta Rede, se falhar ou estiver offline, busca no Cache imediatamente
+// Estratégia de carregamento rápido (Network with Cache Fallback)
 self.addEventListener("fetch", (e) => {
   e.respondWith(
     fetch(e.request).catch(() => {
