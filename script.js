@@ -1,18 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     // Seleção de Elementos DOM
-    const inputs = [
-        document.getElementById("ponto1"),
-        document.getElementById("ponto2"),
-        document.getElementById("ponto3"),
-        document.getElementById("ponto4")
-    ];
-    const inputGroups = [
-        document.getElementById("group_0"),
-        document.getElementById("group_1"),
-        document.getElementById("group_2"),
-        document.getElementById("group_3")
-    ];
-    
+    const inputEntrada = document.getElementById("ponto1");
     const cardBanco = document.getElementById("cardBanco");
     const txtSaidaPrincipal = document.getElementById("txtSaidaPrincipal");
     const floatingBar = document.getElementById("floatingBar");
@@ -21,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const progressText = document.getElementById("progressText");
     const btnLimpar = document.getElementById("btnLimpar");
     
-    // Elementos de Perfil e Botão Instantâneo
     const btnInstant = document.getElementById("btnInstant");
     const btnTheme = document.getElementById("btnTheme");
     const inputNome = document.getElementById("inputNome");
@@ -87,25 +74,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ==========================================
-    // 3. REGRAS DE JORNADA DINÂMICA (SEGUNDA A SEXTA)
+    // 3. REGRAS DE JORNADA + ALMOÇO FIXO DE 1H
     // ==========================================
     function obterRegrasJornada() {
-        const diaDaSemana = new Date().getDay(); // 1 = Segunda, 5 = Sexta, 6 = Sábado, 0 = Domingo
+        const diaDaSemana = new Date().getDay(); // 5 = Sexta-feira
+        const minutosAlmocoFixo = 60; // 1 hora de almoço padrão
         
-        // SEXTA-FEIRA: Jornada de 08h00
+        // SEXTA-FEIRA: 8h de trabalho
         if (diaDaSemana === 5) {
             return {
                 minutosTrabalhoExigidos: 480, 
                 textoCard: "Banco (8h00)",
-                cicloTotalComAlmoco: 540     
+                cicloTotalComAlmoco: 480 + minutosAlmocoFixo // 540 minutos total
             };
         }
         
-        // SEGUNDA A QUINTA (Fallback padrão para finais de semana também)
+        // SEGUNDA A QUINTA: 8h30 de trabalho
         return {
             minutosTrabalhoExigidos: 510, 
             textoCard: "Banco (8h30)",
-            cicloTotalComAlmoco: 570     
+            cicloTotalComAlmoco: 510 + minutosAlmocoFixo // 570 minutos total
         };
     }
 
@@ -113,41 +101,18 @@ document.addEventListener("DOMContentLoaded", () => {
     cardBanco.innerText = regrasDoDia.textoCard;
 
     // ==========================================
-    // 4. REGISTRO INSTANTÂNEO COM UM CLIQUE
+    // 4. REGISTRO INSTANTÂNEO DA ENTRADA
     // ==========================================
     btnInstant.addEventListener("click", () => {
         const agora = new Date();
         const horas = String(agora.getHours()).padStart(2, '0');
         const minutos = String(agora.getMinutes()).padStart(2, '0');
-        const horarioAtualString = `${horas}:${minutos}`;
-
-        let campoPreenchido = false;
-        for (let i = 0; i < inputs.length; i++) {
-            if (!inputs[i].value) {
-                inputs[i].value = horarioAtualString;
-                campoPreenchido = true;
-                salvarDadosPonto();
-                break;
-            }
-        }
-
-        if (!campoPreenchido) {
-            alert("Todos os 4 pontos de hoje já estão registrados!");
-        }
+        inputEntrada.value = `${horas}:${minutos}`;
+        salvarEProcessar();
     });
 
-    function atualizarFocoVisualCampos() {
-        inputGroups.forEach(group => group.classList.remove("active-focus"));
-        for (let i = 0; i < inputs.length; i++) {
-            if (!inputs[i].value) {
-                inputGroups[i].classList.add("active-focus");
-                break;
-            }
-        }
-    }
-
     // ==========================================
-    // 5. MOTOR DE CÁLCULO E OS 3 CENÁRIOS
+    // 5. MOTOR DE CÁLCULO E ATUALIZAÇÃO EM TEMPO REAL
     // ==========================================
     function timeToMinutes(timeStr) {
         if (!timeStr) return null;
@@ -155,14 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return hours * 60 + minutes;
     }
 
-    function minutesToTime(minutes) {
-        if (minutes === null || isNaN(minutes)) return "--:--";
-        const hours = Math.floor(minutes / 60) % 24;
-        const mins = Math.floor(minutes % 60);
-        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0 flights')}`;
-    }
-
-    // Função de tratamento interno simples de string limpa para exibição direta
     function formatarHoraSimples(minutes) {
         if (minutes === null || isNaN(minutes)) return "--:--";
         const hours = Math.floor(minutes / 60) % 24;
@@ -170,131 +127,102 @@ document.addEventListener("DOMContentLoaded", () => {
         return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
     }
 
-    function carregarDadosPonto() {
-        inputs.forEach((input, index) => {
-            const valorSalvo = localStorage.getItem(`ponto_${index + 1}`);
-            if (valorSalvo) input.value = valorSalvo;
-        });
-        processarCenarios();
+    function carregarDados() {
+        const valorSalvo = localStorage.getItem("ponto_entrada_unico");
+        if (valorSalvo) inputEntrada.value = valorSalvo;
+        processarSistema();
     }
 
-    function salvarDadosPonto() {
-        inputs.forEach((input, index) => {
-            localStorage.setItem(`ponto_${index + 1}`, input.value);
-        });
-        processarCenarios();
+    function salvarEProcessar() {
+        localStorage.setItem("ponto_entrada_unico", inputEntrada.value);
+        processarSistema();
     }
 
-    function processarCenarios() {
-        const p1 = timeToMinutes(inputs[0].value);
-        const p2 = timeToMinutes(inputs[1].value);
-        const p3 = timeToMinutes(inputs[2].value);
-        const p4 = timeToMinutes(inputs[3].value);
-
+    function processarSistema() {
+        const p1 = timeToMinutes(inputEntrada.value);
         const regras = obterRegrasJornada();
-        let previsaoMinutos = null;
-        let minutosTrabalhadosAteAgora = 0;
 
-        // CENÁRIO 1: Só a Entrada Manhã batida
-        if (p1 && !p2 && !p3 && !p4) {
+        if (p1) {
+            // Calcula o horário exato de ir embora direto (Entrada + Jornada + 1h Almoço)
+            const minutosSaidaFinal = p1 + regras.cicloTotalComAlmoco;
+            const horaSaidaTexto = formatarHoraSimples(minutosSaidaFinal);
+
+            // Atualiza os painéis de saída do topo e do rodapé
+            txtSaidaPrincipal.innerText = horaSaidaTexto;
+            previsaoHorario.innerText = horaSaidaTexto;
             floatingBar.classList.add("visible");
-            previsaoMinutos = p1 + regras.cicloTotalComAlmoco;
-            
-            const saidaFormatada = formatarHoraSimples(previsaoMinutos);
-            previsaoHorario.innerText = saidaFormatada;
-            txtSaidaPrincipal.innerText = saidaFormatada; // Alimenta o novo card destacado
-            
-            minutosTrabalhadosAteAgora = 0;
             progressBar.classList.add("pulsing");
-        }
 
-        // CENÁRIO 2: Saiu para Almoçar
-        else if (p1 && p2 && !p3 && !p4) {
-            floatingBar.classList.add("visible");
-            previsaoMinutos = p1 + regras.cicloTotalComAlmoco;
-            
-            const saidaFormatada = formatarHoraSimples(previsaoMinutos);
-            previsaoHorario.innerText = saidaFormatada + " (Em Almoço)";
-            txtSaidaPrincipal.innerText = saidaFormatada;
-            
-            minutosTrabalhadosAteAgora = p2 - p1;
-            progressBar.classList.remove("pulsing");
-        }
-
-        // CENÁRIO 3: Voltou do Almoço (Cálculo Fino Cirúrgico)
-        else if (p1 && p2 && p3 && !p4) {
-            floatingBar.classList.add("visible");
-            const tempoTrabalhadoManha = p2 - p1;
-            const tempoRestanteNecessario = regras.minutosTrabalhoExigidos - tempoTrabalhadoManha;
-            
-            previsaoMinutos = p3 + tempoRestanteNecessario;
-            
-            const saidaFormatada = formatarHoraSimples(previsaoMinutos);
-            previsaoHorario.innerText = saidaFormatada;
-            txtSaidaPrincipal.innerText = saidaFormatada; // Cravado com precisão do almoço real
-            
-            minutosTrabalhadosAteAgora = tempoTrabalhadoManha;
-            progressBar.classList.add("pulsing");
-        }
-
-        // FIM DO DIA: Tudo preenchido
-        else if (p1 && p2 && p3 && p4) {
-            floatingBar.classList.add("visible");
-            const tempoTrabalhadoManha = p2 - p1;
-            const tempoTrabalhadoTarde = p4 - p3;
-            minutosTrabalhadosAteAgora = tempoTrabalhadoManha + tempoTrabalhadoTarde;
-            progressBar.classList.remove("pulsing");
-            
-            const saldo = minutosTrabalhadosAteAgora - regras.minutosTrabalhoExigidos;
-            txtSaidaPrincipal.innerText = "Concluído";
-            
-            if (saldo >= 0) {
-                previsaoHorario.innerHTML = `Concluído! Saldo: <span>+${formatarHoraSimples(saldo)}</span>`;
-            } else {
-                previsaoHorario.innerHTML = `Concluído! Faltou: <span style="color:#ef4444">-${formatarHoraSimples(Math.abs(saldo))}</span>`;
-            }
+            // Dispara a função que calcula o progresso dinâmico baseado no relógio agora
+            atualizarProgressoTempoReal(p1, minutosSaidaFinal, regras.minutosTrabalhoExigidos);
         } else {
+            txtSaidaPrincipal.innerText = "--:--";
+            previsaoHorario.innerText = "--:--";
             floatingBar.classList.remove("visible");
             progressBar.classList.remove("pulsing");
-            txtSaidaPrincipal.innerText = "--:--";
+            progressBar.style.width = "0%";
+            progressText.innerText = "Aguardando entrada...";
         }
-
-        atualizarProgresso(minutosTrabalhadosAteAgora, regras.minutosTrabalhoExigidos);
-        atualizarFocoVisualCampos();
     }
 
-    function atualizarProgresso(atuais, meta) {
-        if (meta === 0 || atuais === 0) {
+    function atualizarProgressoTempoReal(minutosEntrada, minutosSaida, minutosTrabalhoMeta) {
+        const agora = new Date();
+        const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
+
+        // Se ainda não chegou no horário de entrada
+        if (minutosAgora < minutosEntrada) {
             progressBar.style.width = "0%";
-            progressText.innerText = "Progresso: 0%";
+            progressText.innerText = "Jornada ainda não iniciada";
             return;
         }
 
-        let porcentagem = (atuais / meta) * 100;
+        // Se já passou do horário de ir embora
+        if (minutosAgora >= minutosSaida) {
+            progressBar.style.width = "100%";
+            progressBar.classList.remove("pulsing");
+            progressText.innerText = `Jornada concluída! Bom descanso!`;
+            return;
+        }
+
+        // Calcula o tempo corrido total do dia até o momento
+        let minutosCorridosTotal = minutosAgora - minutosEntrada;
+        
+        // Desconta de forma inteligente o almoço fictício (60 minutos) conforme o dia avança
+        // Se já passou de 4 horas da entrada, assume-se que o almoço aconteceu/está acontecendo
+        if (minutosCorridosTotal > 240) {
+            minutosCorridosTotal = Math.max(240, minutosCorridosTotal - 60);
+        }
+
+        let porcentagem = (minutosCorridosTotal / minutosTrabalhoMeta) * 100;
         if (porcentagem > 100) porcentagem = 100;
-        
+
         progressBar.style.width = `${porcentagem.toFixed(1)}%`;
-        
-        const horasFormatadas = Math.floor(atuais / 60);
-        const minutosFormatados = atuais % 60;
-        progressText.innerText = `Trabalhado: ${horasFormatadas}h${String(minutosFormatados).padStart(2, '0')}m (${porcentagem.toFixed(0)}%)`;
+
+        const hrs = Math.floor(minutosCorridosTotal / 60);
+        const mns = minutosCorridosTotal % 60;
+        progressText.innerText = `Trabalhado hoje: ${hrs}h${String(mns).padStart(2, '0')}m (${porcentagem.toFixed(0)}%)`;
     }
 
-    // Ouvintes de Eventos
-    inputs.forEach(input => input.addEventListener("input", salvarDadosPonto));
-
+    // Ouvintes
+    inputEntrada.addEventListener("input", salvarEProcessar);
+    
     btnLimpar.addEventListener("click", () => {
-        if (confirm("Deseja limpar os horários registrados de hoje?")) {
-            inputs.forEach((input, index) => {
-                input.value = "";
-                localStorage.removeItem(`ponto_${index + 1}`);
-            });
-            processarCenarios();
+        if (confirm("Deseja limpar o horário de entrada de hoje?")) {
+            inputEntrada.value = "";
+            localStorage.removeItem("ponto_entrada_unico");
+            processarSistema();
         }
     });
 
-    // Inicialização do Fluxo
+    // Loop de Atualização Automática (Executa a cada 30 segundos para atualizar o progresso sozinho)
+    setInterval(() => {
+        if (inputEntrada.value) {
+            processarSistema();
+        }
+    }, 30000);
+
+    // Inicialização
     inicializarTema();
     inicializarPerfil();
-    carregarDadosPonto();
+    carregarDados();
 });
