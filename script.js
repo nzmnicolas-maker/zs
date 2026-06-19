@@ -78,22 +78,22 @@ document.addEventListener("DOMContentLoaded", () => {
     // ==========================================
     function obterRegrasJornada() {
         const diaDaSemana = new Date().getDay(); // 5 = Sexta-feira
-        const minutosAlmocoFixo = 60; // 1 hora de almoço padrão
+        const minutosAlmocoFixo = 60; 
         
-        // SEXTA-FEIRA: 8h de trabalho
+        // SEXTA-FEIRA: 8h de trabalho líquidas
         if (diaDaSemana === 5) {
             return {
                 minutosTrabalhoExigidos: 480, 
-                textoCard: "Banco (8h00)",
-                cicloTotalComAlmoco: 480 + minutosAlmocoFixo // 540 minutos total
+                textoCard: "Meta: 8h00 (Sexta)",
+                cicloTotalComAlmoco: 480 + minutosAlmocoFixo
             };
         }
         
-        // SEGUNDA A QUINTA: 8h30 de trabalho
+        // SEGUNDA A QUINTA: 8h30 de trabalho líquidas
         return {
             minutosTrabalhoExigidos: 510, 
-            textoCard: "Banco (8h30)",
-            cicloTotalComAlmoco: 510 + minutosAlmocoFixo // 570 minutos total
+            textoCard: "Meta: 8h30 (Seg-Qui)",
+            cicloTotalComAlmoco: 510 + minutosAlmocoFixo
         };
     }
 
@@ -143,17 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const regras = obterRegrasJornada();
 
         if (p1) {
-            // Calcula o horário exato de ir embora direto (Entrada + Jornada + 1h Almoço)
             const minutosSaidaFinal = p1 + regras.cicloTotalComAlmoco;
             const horaSaidaTexto = formatarHoraSimples(minutosSaidaFinal);
 
-            // Atualiza os painéis de saída do topo e do rodapé
             txtSaidaPrincipal.innerText = horaSaidaTexto;
             previsaoHorario.innerText = horaSaidaTexto;
             floatingBar.classList.add("visible");
             progressBar.classList.add("pulsing");
 
-            // Dispara a função que calcula o progresso dinâmico baseado no relógio agora
             atualizarProgressoTempoReal(p1, minutosSaidaFinal, regras.minutosTrabalhoExigidos);
         } else {
             txtSaidaPrincipal.innerText = "--:--";
@@ -169,14 +166,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const agora = new Date();
         const minutosAgora = agora.getHours() * 60 + agora.getMinutes();
 
-        // Se ainda não chegou no horário de entrada
         if (minutosAgora < minutosEntrada) {
             progressBar.style.width = "0%";
             progressText.innerText = "Jornada ainda não iniciada";
             return;
         }
 
-        // Se já passou do horário de ir embora
         if (minutosAgora >= minutosSaida) {
             progressBar.style.width = "100%";
             progressBar.classList.remove("pulsing");
@@ -184,11 +179,9 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Calcula o tempo corrido total do dia até o momento
         let minutosCorridosTotal = minutosAgora - minutosEntrada;
         
-        // Desconta de forma inteligente o almoço fictício (60 minutos) conforme o dia avança
-        // Se já passou de 4 horas da entrada, assume-se que o almoço aconteceu/está acontecendo
+        // Desconto dinâmico inteligente de almoço após 4 horas de turno
         if (minutosCorridosTotal > 240) {
             minutosCorridosTotal = Math.max(240, minutosCorridosTotal - 60);
         }
@@ -203,7 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         progressText.innerText = `Trabalhado hoje: ${hrs}h${String(mns).padStart(2, '0')}m (${porcentagem.toFixed(0)}%)`;
     }
 
-    // Ouvintes
+    // Ouvintes de Eventos
     inputEntrada.addEventListener("input", salvarEProcessar);
     
     btnLimpar.addEventListener("click", () => {
@@ -214,12 +207,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Loop de Atualização Automática (Executa a cada 30 segundos para atualizar o progresso sozinho)
+    // Atualização em Loop Perfeita (a cada 15 segundos para atualizar a UI)
     setInterval(() => {
         if (inputEntrada.value) {
             processarSistema();
         }
-    }, 30000);
+    }, 15000);
 
     // Inicialização
     inicializarTema();
