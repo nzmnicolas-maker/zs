@@ -17,7 +17,6 @@
             --navy: #0a2240;
             --cyan-blue: #00e5ff;
             --white: #ffffff;
-            --green: #10b981;
             --orange: #f97316;
             --shadow: rgba(0, 0, 0, 0.05);
             --btn-action-bg: #00e5ff;
@@ -152,11 +151,6 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .btn-theme:active {
-            transform: scale(0.85) rotate(45deg);
         }
 
         h1 {
@@ -170,7 +164,7 @@
             color: var(--white);
         }
 
-        /* Grid de Informações Superiores */
+        /* Grid de Informações */
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -193,7 +187,6 @@
             justify-content: center;
         }
 
-        /* NOVO: Card de Saída Destacado */
         .card-saida-principal {
             background: linear-gradient(135deg, var(--navy), #1e293b);
             color: var(--white);
@@ -217,7 +210,7 @@
             margin-top: 2px;
         }
 
-        /* Botão Mágico Instantâneo (Registrar Agora) */
+        /* Botão Registrar Entrada */
         .btn-instant {
             display: flex;
             align-items: center;
@@ -234,8 +227,6 @@
             cursor: pointer;
             margin-bottom: 25px;
             box-shadow: 0 4px 14px rgba(0, 229, 255, 0.3);
-            transform: translateY(0);
-            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
         }
 
         .btn-instant:hover {
@@ -244,47 +235,40 @@
             box-shadow: 0 6px 20px rgba(0, 229, 255, 0.4);
         }
 
-        .btn-instant:active {
-            transform: translateY(1px);
-        }
-
         .input-group {
-            margin-bottom: 16px;
-            padding: 8px;
-            border-radius: 10px;
-            border: 2px solid transparent;
-        }
-
-        .input-group.active-focus {
-            border-color: rgba(0, 229, 255, 0.4);
-            background: rgba(0, 229, 255, 0.02);
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(0, 229, 255, 0.03);
+            border: 2px solid rgba(0, 229, 255, 0.2);
         }
 
         label {
             display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
+            margin-bottom: 8px;
+            font-weight: 700;
             color: var(--text-main);
-            font-size: 14px;
+            font-size: 15px;
         }
 
         input[type="time"] {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: 2px solid var(--border-color);
             background-color: var(--input-bg);
             color: var(--text-main);
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 18px;
             outline: none;
-            font-weight: 500;
+            font-weight: bold;
+            text-align: center;
         }
 
         input[type="time"]:focus {
             border-color: var(--cyan-blue);
         }
 
-        /* Barra de Progresso Fluida com Efeito Pulsar */
+        /* Barra de Progresso Real-time */
         .progress-container {
             background: var(--border-color);
             border-radius: 12px;
@@ -335,15 +319,14 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
-            transition: background-color 0.2s, color 0.2s;
         }
 
         .btn-clear:hover {
             background: #ef4444;
-            color: #ffffff;
+            color: #white;
         }
 
-        /* Linha Flutuante Animada */
+        /* Linha Flutuante */
         .floating-prediction-bar {
             position: fixed;
             bottom: 0;
@@ -358,7 +341,7 @@
             font-weight: 700;
             box-shadow: 0 -10px 25px rgba(0,0,0,0.2);
             transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s ease;
             z-index: 1000;
         }
 
@@ -370,67 +353,57 @@
             color: var(--cyan-blue);
             font-size: 19px;
             margin-left: 5px;
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
         }
     </style>
 </head>
 <body>
 
     <div class="container">
+        <!-- Perfil e Tema -->
         <div class="profile-panel">
             <div class="profile-info">
-                <div class="avatar-wrapper" id="avatarBtn" title="Alterar foto de perfil">
+                <div class="avatar-wrapper" id="avatarBtn" title="Alterar foto">
                     <div id="avatarPlaceholder" class="avatar-placeholder">👤</div>
-                    <img id="avatarImage" style="display: none;" alt="Foto de Perfil">
+                    <img id="avatarImage" style="display: none;" alt="Foto">
                 </div>
                 <input type="file" id="avatarInput" accept="image/*" style="display: none;">
                 <input type="text" id="inputNome" class="user-name-input" placeholder="Seu nome...">
             </div>
-            <button id="btnTheme" class="btn-theme" title="Mudar tema">🌙</button>
+            <button id="btnTheme" class="btn-theme">🌙</button>
         </div>
 
         <h1>PontoFácil</h1>
         
+        <!-- Info Grid -->
         <div class="info-grid">
-            <div id="cardBanco" class="card-banco">Banco (Carregando...)</div>
+            <div id="cardBanco" class="card-banco">Banco (8h30)</div>
             <div class="card-saida-principal">
-                Horário de Saída
+                Hora de Ir Embora
                 <span id="txtSaidaPrincipal">--:--</span>
             </div>
         </div>
 
+        <!-- Botão Unificado -->
         <button id="btnInstant" class="btn-instant">
-            ⏱️ Registrar Hora Atual
+            ⏱️ Registrar Entrada Agora
         </button>
 
-        <div class="input-group" id="group_0">
-            <label for="ponto1">1ª Batida - Entrada Manhã</label>
+        <!-- Apenas o único input necessário -->
+        <div class="input-group">
+            <label for="ponto1">Horário de Entrada da Manhã</label>
             <input type="time" id="ponto1">
         </div>
 
-        <div class="input-group" id="group_1">
-            <label for="ponto2">2ª Batida - Saída Almoço (Início)</label>
-            <input type="time" id="ponto2">
-        </div>
-
-        <div class="input-group" id="group_2">
-            <label for="ponto3">3ª Batida - Retorno Almoço (Fim)</label>
-            <input type="time" id="ponto3">
-        </div>
-
-        <div class="input-group" id="group_3">
-            <label for="ponto4">4ª Batida - Saída Final</label>
-            <input type="time" id="ponto4">
-        </div>
-
+        <!-- Progresso em tempo real -->
         <div class="progress-container">
             <div id="progressBar" class="progress-bar"></div>
         </div>
-        <div id="progressText" class="progress-text">Progresso: 0%</div>
+        <div id="progressText" class="progress-text">Aguardando entrada...</div>
 
-        <button class="btn-clear" id="btnLimpar">Limpar Registros</button>
+        <button class="btn-clear" id="btnLimpar">Limpar Registro</button>
     </div>
 
+    <!-- Rodapé Informativo -->
     <div id="floatingBar" class="floating-prediction-bar">
         Previsão de Saída Estimada: <span id="previsaoHorario">--:--</span>
     </div>
