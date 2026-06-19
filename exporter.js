@@ -1,36 +1,17 @@
-/**
- * PontoFácil Analytics - Exportador Estruturado para RH
- */
-function exportarParaExcel(registros) {
-  if (!registros || registros.length === 0) {
-    alert("Nenhum dado disponível para exportação.");
-    return;
-  }
+// Função para exportar os dados atuais salvos no seu PontoFácil
+function exportarDadosPonto() {
+    const dados = {
+        nome: localStorage.getItem("user_name") || "Não informado",
+        entradaRegistrada: localStorage.getItem("ponto_entrada_unico") || "--:--",
+        temaPrefencial: localStorage.getItem("theme") || "light",
+        dataExportacao: new Date().toLocaleDateString('pt-BR')
+    };
 
-  const cabecalhos = ["Data", "Tipo de Registro", "Horário Oficial", "Chave de Autenticação"];
-  const linhas = registros.map(reg => [
-    reg.data,
-    reg.tipo,
-    reg.hora,
-    reg.assinatura || "Sem assinatura"
-  ]);
-
-  let csvContent = "\uFEFF"; 
-  csvContent += cabecalhos.join(";") + "\n";
-  
-  linhas.forEach(linha => {
-    csvContent += linha.join(";") + "\n";
-  });
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  
-  const dataAtual = new Date().toISOString().split('T')[0];
-  link.setAttribute("href", url);
-  link.setAttribute("download", `Espelho_Ponto_${dataAtual}.csv`);
-  
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dados, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `PontoFacil_Backup_${dados.dataExportacao.replace(/\//g, '-')}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
 }
