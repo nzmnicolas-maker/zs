@@ -1,6 +1,6 @@
 {
   "short_name": "PontoFácil",
-  "name": "PontoFácil - Controle de Ponto Inteligente",
+  "name": "PontoFácil - SaaS Premium",
   "icons": [
     {
       "src": "icon-192.png",
@@ -14,8 +14,8 @@
     }
   ],
   "start_url": "./index.html",
-  "background_color": "#090d16",
-  "theme_color": "#0a2240",
+  "background_color": "#0b132b",
+  "theme_color": "#1c2541",
   "display": "standalone",
   "orientation": "portrait"
 }
