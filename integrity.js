@@ -1,30 +1,18 @@
-/**
- * PontoFácil Security Core - Proteção Criptográfica SHA-256
- */
-const SECURITY_SECRET = "PONTO_FACIL_ULTRA_SECRET_KEY_2026";
-
-async function gerarAssinaturaDigital(ponto) {
-  const mensagem = `${ponto.tipo}-${ponto.timestamp}-${ponto.data}-${SECURITY_SECRET}`;
-  const encoder = new TextEncoder();
-  const data = encoder.encode(mensagem);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function verificarIntegridadeDosDados(listaRegistros) {
-  if (!listaRegistros || listaRegistros.length === 0) return true;
-  
-  for (let registro of listaRegistros) {
-    if (!registro.assinatura) return false;
+(function verificarEFAzerLimpeza() {
+    // Lista de chaves antigas do modelo de 4 batidas que não usamos mais
+    const chavesAntigas = ["ponto_1", "ponto_2", "ponto_3", "ponto_4"];
     
-    const dadosOriginais = { tipo: registro.tipo, timestamp: registro.timestamp, data: registro.data };
-    const hashValido = await gerarAssinaturaDigital(dadosOriginais);
-    
-    if (hashValido !== registro.assinatura) {
-      console.error("⚠️ Violação detectada no registro:", registro);
-      return false; 
+    chavesAntigas.forEach(chave => {
+        if (localStorage.getItem(chave)) {
+            localStorage.removeItem(chave); // Remove o lixo do sistema antigo
+            console.log(`[Integridade] Chave antiga removida: ${chave}`);
+        }
+    });
+
+    // Garante que o banco de dados interno do PWA não está corrompido
+    const entradaAtual = localStorage.getItem("ponto_entrada_unico");
+    if (entradaAtual && !/^\d{2}:\d{2}$/.test(entradaAtual)) {
+        console.error("[Integridade] Formato de hora inválido detectado. Resetando entrada.");
+        localStorage.removeItem("ponto_entrada_unico");
     }
-  }
-  return true;
-}
+})();
