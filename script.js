@@ -1,19 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Seleção de Elementos Globais
+    // Seleção de Elementos DOM
     const inputs = [
         document.getElementById("ponto1"),
         document.getElementById("ponto2"),
         document.getElementById("ponto3"),
         document.getElementById("ponto4")
     ];
+    const inputGroups = [
+        document.getElementById("group_0"),
+        document.getElementById("group_1"),
+        document.getElementById("group_2"),
+        document.getElementById("group_3")
+    ];
+    
     const cardBanco = document.getElementById("cardBanco");
+    const txtSaidaPrincipal = document.getElementById("txtSaidaPrincipal");
     const floatingBar = document.getElementById("floatingBar");
     const previsaoHorario = document.getElementById("previsaoHorario");
     const progressBar = document.getElementById("progressBar");
     const progressText = document.getElementById("progressText");
     const btnLimpar = document.getElementById("btnLimpar");
-
-    // Elementos Novos (Perfil e Tema)
+    
+    // Elementos de Perfil e Botão Instantâneo
+    const btnInstant = document.getElementById("btnInstant");
     const btnTheme = document.getElementById("btnTheme");
     const inputNome = document.getElementById("inputNome");
     const avatarBtn = document.getElementById("avatarBtn");
@@ -22,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const avatarPlaceholder = document.getElementById("avatarPlaceholder");
 
     // ==========================================
-    // 1. GERENCIAMENTO DE TEMA (DARK MODE)
+    // 1. GERENCIAMENTO DO TEMA (DARK MODE)
     // ==========================================
     function inicializarTema() {
         const temaSalvo = localStorage.getItem("theme") || "light";
@@ -37,24 +46,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnTheme.addEventListener("click", () => {
         const estaNoEscuro = document.body.classList.toggle("dark-mode");
-        if (estaNoEscuro) {
-            localStorage.setItem("theme", "dark");
-            btnTheme.innerText = "☀️";
-        } else {
-            localStorage.setItem("theme", "light");
-            btnTheme.innerText = "🌙";
-        }
+        localStorage.setItem("theme", estaNoEscuro ? "dark" : "light");
+        btnTheme.innerText = estaNoEscuro ? "☀️" : "🌙";
     });
 
     // ==========================================
-    // 2. CADASTRO DE PERFIL (NOME E FOTO)
+    // 2. PAINEL DE PERFIL (NOME E FOTO)
     // ==========================================
     function inicializarPerfil() {
-        // Carrega o Nome
         const nomeSalvo = localStorage.getItem("user_name");
         if (nomeSalvo) inputNome.value = nomeSalvo;
 
-        // Carrega a Foto
         const fotoSalva = localStorage.getItem("user_avatar");
         if (fotoSalva) {
             avatarImage.src = fotoSalva;
@@ -63,24 +65,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Escuta alteração do Nome
     inputNome.addEventListener("input", () => {
         localStorage.setItem("user_name", inputNome.value);
     });
 
-    // Gatilho de clique no botão redondo de foto
     avatarBtn.addEventListener("click", () => avatarInput.click());
 
-    // Processamento do upload da foto (Conversão para Base64)
     avatarInput.addEventListener("change", (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(event) {
                 const base64String = event.target.result;
-                // Salva no LocalStorage
                 localStorage.setItem("user_avatar", base64String);
-                // Renderiza na tela
                 avatarImage.src = base64String;
                 avatarImage.style.display = "block";
                 avatarPlaceholder.style.display = "none";
@@ -89,37 +86,68 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-
     // ==========================================
-    // 3. REGRAS DA JORNADA (MUDANÇA DE SEXTA)
+    // 3. REGRAS DE JORNADA DINÂMICA (SEGUNDA A SEXTA)
     // ==========================================
     function obterRegrasJornada() {
-        const diaDaSemana = new Date().getDay(); // 1 = Seg, 5 = Sex...
+        const diaDaSemana = new Date().getDay(); // 1 = Segunda, 5 = Sexta, 6 = Sábado, 0 = Domingo
         
-        // Regra de SEXTA-FEIRA: 8h de trabalho
+        // SEXTA-FEIRA: Jornada de 08h00
         if (diaDaSemana === 5) {
             return {
-                minutosTrabalhoExigidos: 480, // 8h
+                minutosTrabalhoExigidos: 480, 
                 textoCard: "Banco (8h00)",
-                cicloTotalComAlmoco: 540     // 8h + 1h almoço
+                cicloTotalComAlmoco: 540     
             };
         }
         
-        // Regra de SEGUNDA A QUINTA: 8h30 de trabalho
+        // SEGUNDA A QUINTA (Fallback padrão para finais de semana também)
         return {
-            minutosTrabalhoExigidos: 510, // 8h30
+            minutosTrabalhoExigidos: 510, 
             textoCard: "Banco (8h30)",
-            cicloTotalComAlmoco: 570     // 8h30 + 1h almoço
+            cicloTotalComAlmoco: 570     
         };
     }
 
-    // Seta o card inicial do banco imediatamente
     const regrasDoDia = obterRegrasJornada();
     cardBanco.innerText = regrasDoDia.textoCard;
 
+    // ==========================================
+    // 4. REGISTRO INSTANTÂNEO COM UM CLIQUE
+    // ==========================================
+    btnInstant.addEventListener("click", () => {
+        const agora = new Date();
+        const horas = String(agora.getHours()).padStart(2, '0');
+        const minutos = String(agora.getMinutes()).padStart(2, '0');
+        const horarioAtualString = `${horas}:${minutos}`;
+
+        let campoPreenchido = false;
+        for (let i = 0; i < inputs.length; i++) {
+            if (!inputs[i].value) {
+                inputs[i].value = horarioAtualString;
+                campoPreenchido = true;
+                salvarDadosPonto();
+                break;
+            }
+        }
+
+        if (!campoPreenchido) {
+            alert("Todos os 4 pontos de hoje já estão registrados!");
+        }
+    });
+
+    function atualizarFocoVisualCampos() {
+        inputGroups.forEach(group => group.classList.remove("active-focus"));
+        for (let i = 0; i < inputs.length; i++) {
+            if (!inputs[i].value) {
+                inputGroups[i].classList.add("active-focus");
+                break;
+            }
+        }
+    }
 
     // ==========================================
-    // 4. CÁLCULO DE HORÁRIOS E CENÁRIOS
+    // 5. MOTOR DE CÁLCULO E OS 3 CENÁRIOS
     // ==========================================
     function timeToMinutes(timeStr) {
         if (!timeStr) return null;
@@ -128,6 +156,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function minutesToTime(minutes) {
+        if (minutes === null || isNaN(minutes)) return "--:--";
+        const hours = Math.floor(minutes / 60) % 24;
+        const mins = Math.floor(minutes % 60);
+        return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0 flights')}`;
+    }
+
+    // Função de tratamento interno simples de string limpa para exibição direta
+    function formatarHoraSimples(minutes) {
         if (minutes === null || isNaN(minutes)) return "--:--";
         const hours = Math.floor(minutes / 60) % 24;
         const mins = Math.floor(minutes % 60);
@@ -159,51 +195,72 @@ document.addEventListener("DOMContentLoaded", () => {
         let previsaoMinutos = null;
         let minutosTrabalhadosAteAgora = 0;
 
-        // CENÁRIO 1: Apenas Entrada Batida
+        // CENÁRIO 1: Só a Entrada Manhã batida
         if (p1 && !p2 && !p3 && !p4) {
-            floatingBar.style.display = "block";
+            floatingBar.classList.add("visible");
             previsaoMinutos = p1 + regras.cicloTotalComAlmoco;
-            previsaoHorario.innerText = minutesToTime(previsaoMinutos);
+            
+            const saidaFormatada = formatarHoraSimples(previsaoMinutos);
+            previsaoHorario.innerText = saidaFormatada;
+            txtSaidaPrincipal.innerText = saidaFormatada; // Alimenta o novo card destacado
+            
             minutosTrabalhadosAteAgora = 0;
+            progressBar.classList.add("pulsing");
         }
 
-        // CENÁRIO 2: Saída para Almoço
+        // CENÁRIO 2: Saiu para Almoçar
         else if (p1 && p2 && !p3 && !p4) {
-            floatingBar.style.display = "block";
+            floatingBar.classList.add("visible");
             previsaoMinutos = p1 + regras.cicloTotalComAlmoco;
-            previsaoHorario.innerText = minutesToTime(previsaoMinutos) + " (Em Almoço)";
+            
+            const saidaFormatada = formatarHoraSimples(previsaoMinutos);
+            previsaoHorario.innerText = saidaFormatada + " (Em Almoço)";
+            txtSaidaPrincipal.innerText = saidaFormatada;
+            
             minutosTrabalhadosAteAgora = p2 - p1;
+            progressBar.classList.remove("pulsing");
         }
 
-        // CENÁRIO 3: Retorno do Almoço (Ajuste cirúrgico fino)
+        // CENÁRIO 3: Voltou do Almoço (Cálculo Fino Cirúrgico)
         else if (p1 && p2 && p3 && !p4) {
-            floatingBar.style.display = "block";
+            floatingBar.classList.add("visible");
             const tempoTrabalhadoManha = p2 - p1;
             const tempoRestanteNecessario = regras.minutosTrabalhoExigidos - tempoTrabalhadoManha;
             
             previsaoMinutos = p3 + tempoRestanteNecessario;
-            previsaoHorario.innerText = minutesToTime(previsaoMinutos);
+            
+            const saidaFormatada = formatarHoraSimples(previsaoMinutos);
+            previsaoHorario.innerText = saidaFormatada;
+            txtSaidaPrincipal.innerText = saidaFormatada; // Cravado com precisão do almoço real
+            
             minutosTrabalhadosAteAgora = tempoTrabalhadoManha;
+            progressBar.classList.add("pulsing");
         }
 
-        // FIM DO DIA: Todos batidos
+        // FIM DO DIA: Tudo preenchido
         else if (p1 && p2 && p3 && p4) {
-            floatingBar.style.display = "block";
+            floatingBar.classList.add("visible");
             const tempoTrabalhadoManha = p2 - p1;
             const tempoTrabalhadoTarde = p4 - p3;
             minutosTrabalhadosAteAgora = tempoTrabalhadoManha + tempoTrabalhadoTarde;
+            progressBar.classList.remove("pulsing");
             
             const saldo = minutosTrabalhadosAteAgora - regras.minutosTrabalhoExigidos;
+            txtSaidaPrincipal.innerText = "Concluído";
+            
             if (saldo >= 0) {
-                previsaoHorario.innerText = `Concluído! Saldo: +${minutesToTime(saldo)}`;
+                previsaoHorario.innerHTML = `Concluído! Saldo: <span>+${formatarHoraSimples(saldo)}</span>`;
             } else {
-                previsaoHorario.innerText = `Concluído! Faltou: -${minutesToTime(Math.abs(saldo))}`;
+                previsaoHorario.innerHTML = `Concluído! Faltou: <span style="color:#ef4444">-${formatarHoraSimples(Math.abs(saldo))}</span>`;
             }
         } else {
-            floatingBar.style.display = "none";
+            floatingBar.classList.remove("visible");
+            progressBar.classList.remove("pulsing");
+            txtSaidaPrincipal.innerText = "--:--";
         }
 
         atualizarProgresso(minutosTrabalhadosAteAgora, regras.minutosTrabalhoExigidos);
+        atualizarFocoVisualCampos();
     }
 
     function atualizarProgresso(atuais, meta) {
@@ -223,12 +280,11 @@ document.addEventListener("DOMContentLoaded", () => {
         progressText.innerText = `Trabalhado: ${horasFormatadas}h${String(minutosFormatados).padStart(2, '0')}m (${porcentagem.toFixed(0)}%)`;
     }
 
-    // Ouvintes de alteração dos pontos
+    // Ouvintes de Eventos
     inputs.forEach(input => input.addEventListener("input", salvarDadosPonto));
 
-    // Botão Limpar Tudo
     btnLimpar.addEventListener("click", () => {
-        if (confirm("Deseja limpar seus horários? (Nome e Foto não serão apagados)")) {
+        if (confirm("Deseja limpar os horários registrados de hoje?")) {
             inputs.forEach((input, index) => {
                 input.value = "";
                 localStorage.removeItem(`ponto_${index + 1}`);
@@ -237,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Inicialização do fluxo da aplicação
+    // Inicialização do Fluxo
     inicializarTema();
     inicializarPerfil();
     carregarDadosPonto();
